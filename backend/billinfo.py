@@ -46,5 +46,9 @@ except json.JSONDecodeError:
 geo_client = Geocodio(os.getenv("GEOCODIO_API_KEY"))
 response = geo_client.geocode("667 Fraternity Dr, Gainesville, FL 32601", fields=["cd", "stateleg"])
 #%%
-print(response.results[0].fields.congressional_district.representative.name)
+print(response.results[0])
+# %%
+print(response.results[0].address_components.state)
+# %%
+print(response.results[0].fields.congressional_districts[0].district_number)
 # %%

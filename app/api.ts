@@ -8,6 +8,7 @@ export interface Legislator {
   url: string;
   address: string;
   phone: string;
+  Role: string;
 }
 export interface LegislatorResponse {
   legislators: Legislator[];
@@ -17,8 +18,9 @@ class ApiService {
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
   }
-  async getLegislators(state: string): Promise<Legislator[]> {
-    const url = `${this.baseUrl}/legislators/${state}`;
+  async getLegislators(address: string): Promise<Legislator[]> {
+    const url = `${this.baseUrl}/legislators/${encodeURIComponent(address)}`;
+    console.log(url);
     const response = await fetch(url, {
       method: "GET",
     });

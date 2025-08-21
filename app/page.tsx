@@ -28,17 +28,23 @@ async function getTokens() {
 export default function Home() {
   const [legislators, setLegislators] = useState<Legislator[]>([]);
   const [selectedState, setSelectedState] = useState<string>("");
+  const [address, setAddress] = useState<string>("");
   const [findReps, setFindReps] = useState<boolean>(false);
-  const getLegislators = async (state: string) => {
+  const getLegislators = async (address: string) => {
     try {
       setFindReps(true);
-      const gotlegislators = await apiService.getLegislators(state);
+      const gotlegislators = await apiService.getLegislators(address);
       console.log(gotlegislators);
       setLegislators(gotlegislators);
-      console.log(legislators.length);
     } catch (error) {
       console.error("Error fetching legislators:", error);
     }
+  };
+
+  const handleFindReps = async () => {
+    setFindReps(true);
+    console.log(address);
+    await getLegislators(address);
   };
 
   const components = {
@@ -75,81 +81,29 @@ export default function Home() {
 
             <div className="mb-6">
               <label
-                htmlFor="state-select"
+                htmlFor="address-input"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Select Your State
+                Enter Your Address
               </label>
-              <select
-                id="state-select"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-black bg-white"
-                defaultValue=""
+              <input
+                id="address-input"
+                type="text"
+                value={address}
                 onChange={(e) => {
-                  setSelectedState(e.target.value);
+                  setAddress(e.target.value);
                   setFindReps(false);
+                  setLegislators([]);
                 }}
-              >
-                <option value="" disabled className="text-gray-500">
-                  Choose a state...
-                </option>
-                <option value="AL">AL - Alabama</option>
-                <option value="AK">AK - Alaska</option>
-                <option value="AZ">AZ - Arizona</option>
-                <option value="AR">AR - Arkansas</option>
-                <option value="CA">CA - California</option>
-                <option value="CO">CO - Colorado</option>
-                <option value="CT">CT - Connecticut</option>
-                <option value="DE">DE - Delaware</option>
-                <option value="FL">FL - Florida</option>
-                <option value="GA">GA - Georgia</option>
-                <option value="HI">HI - Hawaii</option>
-                <option value="ID">ID - Idaho</option>
-                <option value="IL">IL - Illinois</option>
-                <option value="IN">IN - Indiana</option>
-                <option value="IA">IA - Iowa</option>
-                <option value="KS">KS - Kansas</option>
-                <option value="KY">KY - Kentucky</option>
-                <option value="LA">LA - Louisiana</option>
-                <option value="ME">ME - Maine</option>
-                <option value="MD">MD - Maryland</option>
-                <option value="MA">MA - Massachusetts</option>
-                <option value="MI">MI - Michigan</option>
-                <option value="MN">MN - Minnesota</option>
-                <option value="MS">MS - Mississippi</option>
-                <option value="MO">MO - Missouri</option>
-                <option value="MT">MT - Montana</option>
-                <option value="NE">NE - Nebraska</option>
-                <option value="NV">NV - Nevada</option>
-                <option value="NH">NH - New Hampshire</option>
-                <option value="NJ">NJ - New Jersey</option>
-                <option value="NM">NM - New Mexico</option>
-                <option value="NY">NY - New York</option>
-                <option value="NC">NC - North Carolina</option>
-                <option value="ND">ND - North Dakota</option>
-                <option value="OH">OH - Ohio</option>
-                <option value="OK">OK - Oklahoma</option>
-                <option value="OR">OR - Oregon</option>
-                <option value="PA">PA - Pennsylvania</option>
-                <option value="RI">RI - Rhode Island</option>
-                <option value="SC">SC - South Carolina</option>
-                <option value="SD">SD - South Dakota</option>
-                <option value="TN">TN - Tennessee</option>
-                <option value="TX">TX - Texas</option>
-                <option value="UT">UT - Utah</option>
-                <option value="VT">VT - Vermont</option>
-                <option value="VA">VA - Virginia</option>
-                <option value="WA">WA - Washington</option>
-                <option value="WV">WV - West Virginia</option>
-                <option value="WI">WI - Wisconsin</option>
-                <option value="WY">WY - Wyoming</option>
-                <option value="DC">DC - District of Columbia</option>
-              </select>
+                placeholder="e.g., 1600 Pennsylvania Ave NW, Washington, DC 20500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-black bg-white"
+              />
             </div>
 
             <button
               className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!selectedState}
-              onClick={() => getLegislators(selectedState)}
+              disabled={!address}
+              onClick={handleFindReps}
             >
               Find My Representatives
             </button>
@@ -165,24 +119,13 @@ export default function Home() {
                   {legislators.map((legislator, index) => (
                     <div
                       key={index}
-                      className="bg-gray-50 rounded-lg p-4 border border-gray-200"
+                      className="bg-gray-50 rounded-lg p-4 border border-gray-200 text-center"
                     >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h4 className="font-medium text-gray-900">
-                            {legislator.name}
-                          </h4>
-                          <p className="text-sm text-gray-600 mt-1">
-                            Party: {legislator.party} • State:{" "}
-                            {legislator.state}
-                          </p>
-                          {legislator.gender && (
-                            <p className="text-sm text-gray-600">
-                              Gender: {legislator.gender}
-                            </p>
-                          )}
-                        </div>
-                        <div className="text-right">
+                      <div className="flex flex-col items-center">
+                        <h4 className="font-bold text-gray-900 text-lg mb-3">
+                          {legislator.name}
+                        </h4>
+                        <div className="mb-3">
                           <span
                             className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                               legislator.party === "Democrat"
@@ -194,6 +137,14 @@ export default function Home() {
                           >
                             {legislator.party}
                           </span>
+                        </div>
+                        <div className="text-sm text-gray-600 space-y-1 mb-3">
+                          <p>State: {legislator.state}</p>
+                          <p>Role: {legislator.Role}</p>
+                          <p>Party: {legislator.party}</p>
+                          {legislator.gender && (
+                            <p>Gender: {legislator.gender}</p>
+                          )}
                         </div>
                       </div>
 

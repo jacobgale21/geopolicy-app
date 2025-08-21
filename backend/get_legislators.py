@@ -7,6 +7,8 @@ import dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
+from geocodio import Geocodio
+
 # Load environment variables
 dotenv.load_dotenv()
 
@@ -27,8 +29,13 @@ allow_methods=["*"],
 allow_headers=["*"],
 )
 
-@app.get("/legislators/{state}")
-async def get_legislators(state):
+@app.get("/legislators/{address}")
+async def get_legislators(address: str):
+    geo_client = Geocodio(os.getenv("GEOCODIO_API_KEY"))
+    response = geo_client.geocode(address, fields=["cd"])
+    state = response.results[0].address_components.state
+    cd = response.results[0].fields.congressional_districts[0].district_number
+    
     conn = None
     cur = None
     try:
@@ -38,7 +45,7 @@ async def get_legislators(state):
         senators = cur.fetchall()
         
         # Convert database tuples to dictionaries with named properties
-        formatted_senators = []
+        formatted_legislators = []
         for senator in senators:
             formatted_senator = {
                 "id": senator[0],
@@ -48,11 +55,27 @@ async def get_legislators(state):
                 "gender": senator[4],
                 "url": senator[5],
                 "address": senator[6],
-                "phone": senator[7]
+                "phone": senator[7],
+                "Role": "Senator"
             }
-            formatted_senators.append(formatted_senator)
+            formatted_legislators.append(formatted_senator)
+        cur.execute("SELECT * FROM Representatives WHERE state = %s AND district = %s", (state, cd))
+        representatives = cur.fetchall()
         
-        return {"legislators": formatted_senators}
+        for representative in representatives:
+            formatted_representative = {
+                "id": representative[0],
+                "name": representative[1],
+                "state": representative[2],
+                "party": representative[4],
+                "gender": representative[5],
+                "url": representative[6],
+                "address": representative[7],
+                "phone": representative[8],
+                "Role": "Representative"
+            }
+            formatted_legislators.append(formatted_representative)
+        return {"legislators": formatted_legislators}
         
     except Exception as e:
         return {"error": f"Database error: {str(e)}"}
