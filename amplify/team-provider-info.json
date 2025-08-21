@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-geopolicyapp-dev-ad95f-authRole",
+      "UnauthRoleArn": "arn:aws:iam::487498333260:role/amplify-geopolicyapp-dev-ad95f-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::487498333260:role/amplify-geopolicyapp-dev-ad95f-authRole",
+      "Region": "us-east-2",
+      "DeploymentBucketName": "amplify-geopolicyapp-dev-ad95f-deployment",
+      "UnauthRoleName": "amplify-geopolicyapp-dev-ad95f-unauthRole",
+      "StackName": "amplify-geopolicyapp-dev-ad95f",
+      "StackId": "arn:aws:cloudformation:us-east-2:487498333260:stack/amplify-geopolicyapp-dev-ad95f/9fb99b70-7d12-11f0-bd41-0202109aec1d",
+      "AmplifyAppId": "d2bglazgnqu52m"
+    },
+    "categories": {
+      "auth": {
+        "geopolicyapp808646fb": {}
+      }
+    }
+  }
+}
