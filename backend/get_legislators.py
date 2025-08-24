@@ -4,11 +4,11 @@ from psycopg2 import Error
 import pandas as pd
 import os
 import dotenv
-from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 from geocodio import Geocodio
-
+from middleware import verify_token
+from fastapi import Depends, FastAPI
 # Load environment variables
 dotenv.load_dotenv()
 
@@ -30,12 +30,11 @@ allow_headers=["*"],
 )
 
 @app.get("/legislators/{address}")
-async def get_legislators(address: str):
+async def get_legislators(address: str, token: str = Depends(verify_token)):
     geo_client = Geocodio(os.getenv("GEOCODIO_API_KEY"))
     response = geo_client.geocode(address, fields=["cd"])
     state = response.results[0].address_components.state
     cd = response.results[0].fields.congressional_districts[0].district_number
-    
     conn = None
     cur = None
     try:

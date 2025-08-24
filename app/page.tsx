@@ -13,10 +13,7 @@ async function getTokens() {
   try {
     const session = await fetchAuthSession();
     if (session.tokens) {
-      const idToken = session.tokens.idToken?.toString();
-      const accessToken = session.tokens.accessToken?.toString();
-      console.log("ID Token:", idToken);
-      console.log("Access Token:", accessToken);
+      return session.tokens.accessToken?.toString();
     } else {
       console.log("No tokens available");
     }
@@ -32,9 +29,13 @@ export default function Home() {
   const [findReps, setFindReps] = useState<boolean>(false);
   const getLegislators = async (address: string) => {
     try {
-      setFindReps(true);
-      const gotlegislators = await apiService.getLegislators(address);
-      console.log(gotlegislators);
+      const token = await getTokens();
+      if (!token) {
+        console.error("No token available");
+        return;
+      }
+      const gotlegislators = await apiService.getLegislators(address, token);
+      setSelectedState(gotlegislators[0].state);
       setLegislators(gotlegislators);
     } catch (error) {
       console.error("Error fetching legislators:", error);

@@ -18,11 +18,14 @@ class ApiService {
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl;
   }
-  async getLegislators(address: string): Promise<Legislator[]> {
+  async getLegislators(address: string, token: string): Promise<Legislator[]> {
     const url = `${this.baseUrl}/legislators/${encodeURIComponent(address)}`;
     console.log(url);
     const response = await fetch(url, {
       method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
     });
     if (!response.ok) {
       const error = await response.json();

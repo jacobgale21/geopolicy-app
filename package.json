@@ -12,6 +12,7 @@
     "@aws-amplify/adapter-nextjs": "^1.6.8",
     "@aws-amplify/ui-react": "^6.11.2",
     "aws-amplify": "^6.15.5",
+    "aws-jwt-verify": "^5.1.0",
     "dotenv": "^17.2.1",
     "next": "15.4.6",
     "oidc-client-ts": "^3.3.0",
