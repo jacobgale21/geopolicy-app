@@ -6,6 +6,7 @@ import awsExports from "../src/aws-exports";
 import "@aws-amplify/ui-react/styles.css";
 import { apiService, Legislator } from "./api";
 import { useState } from "react";
+import CrimeChart from "./components/CrimeChart";
 
 Amplify.configure(awsExports);
 
@@ -22,11 +23,17 @@ async function getTokens() {
   }
 }
 
+interface CrimeDataPoint {
+  month_year: string;
+  crime_counts: number;
+}
+
 export default function Home() {
   const [legislators, setLegislators] = useState<Legislator[]>([]);
   const [selectedState, setSelectedState] = useState<string>("");
   const [address, setAddress] = useState<string>("");
   const [findReps, setFindReps] = useState<boolean>(false);
+  const [crimeData, setCrimeData] = useState<CrimeDataPoint[]>([]);
   const getLegislators = async (address: string) => {
     try {
       const token = await getTokens();
@@ -35,14 +42,19 @@ export default function Home() {
         return;
       }
       const gotlegislators = await apiService.getLegislators(address, token);
-      const crimeData = await apiService.getCrimeData(
+      const crimeDataResponse = await apiService.getCrimeData(
         gotlegislators[0].state,
         "Homicide",
         token
       );
-      console.log(crimeData);
       setSelectedState(gotlegislators[0].state);
       setLegislators(gotlegislators);
+
+      const newData = crimeDataResponse.map((item: [string, number]) => ({
+        month_year: item[0],
+        crime_counts: item[1],
+      }));
+      setCrimeData([...crimeData, ...newData]);
     } catch (error) {
       console.error("Error fetching legislators:", error);
     }
@@ -73,7 +85,7 @@ export default function Home() {
   };
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-2xl">
         <Authenticator
           components={components}
           className="[&_.amplify-card]:bg-white [&_.amplify-card]:shadow-xl [&_.amplify-card]:rounded-2xl [&_.amplify-card]:border-0 [&_.amplify-card]:p-8 [&_.amplify-button--primary]:bg-purple-600 [&_.amplify-button--primary]:hover:bg-purple-700 [&_.amplify-button--primary]:border-0 [&_.amplify-button--primary]:rounded-lg [&_.amplify-button--primary]:font-medium [&_.amplify-button--primary]:py-3 [&_.amplify-button--primary]:px-6 [&_.amplify-button--link]:text-purple-600 [&_.amplify-button--link]:hover:text-purple-700 [&_.amplify-button--link]:font-medium [&_.amplify-field]:mb-4 [&_.amplify-input]:border-gray-300 [&_.amplify-input]:rounded-lg [&_.amplify-input]:py-3 [&_.amplify-input]:px-4 [&_.amplify-input]:focus:border-purple-500 [&_.amplify-input]:focus:ring-2 [&_.amplify-input]:focus:ring-purple-200 [&_.amplify-label]:text-gray-700 [&_.amplify-label]:font-medium [&_.amplify-label]:mb-2 [&_.amplify-alert]:border-purple-200 [&_.amplify-alert]:bg-purple-50 [&_.amplify-alert]:text-purple-800 [&_.amplify-alert]:rounded-lg [&_.amplify-divider]:border-gray-200 [&_.amplify-divider-text]:bg-white [&_.amplify-divider-text]:text-gray-500 [&_.amplify-tabs]:border-gray-200 [&_.amplify-tabs-item]:text-gray-600 [&_.amplify-tabs-item]:border-transparent [&_.amplify-tabs-item--active]:text-purple-600 [&_.amplify-tabs-item--active]:border-purple-600"
@@ -101,6 +113,7 @@ export default function Home() {
                   setAddress(e.target.value);
                   setFindReps(false);
                   setLegislators([]);
+                  setCrimeData([]);
                 }}
                 placeholder="e.g., 1600 Pennsylvania Ave NW, Washington, DC 20500"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-black bg-white"
@@ -187,6 +200,17 @@ export default function Home() {
                   No senators found for {selectedState}. Please try another
                   state.
                 </p>
+              </div>
+            )}
+
+            {/* Crime Data Chart */}
+            {crimeData.length > 0 && (
+              <div className="mt-8 border-t pt-6">
+                <CrimeChart
+                  data={crimeData}
+                  state={selectedState}
+                  crimeType="Homicide"
+                />
               </div>
             )}
           </div>
