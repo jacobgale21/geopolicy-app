@@ -35,6 +35,12 @@ export default function Home() {
         return;
       }
       const gotlegislators = await apiService.getLegislators(address, token);
+      const crimeData = await apiService.getCrimeData(
+        gotlegislators[0].state,
+        "Homicide",
+        token
+      );
+      console.log(crimeData);
       setSelectedState(gotlegislators[0].state);
       setLegislators(gotlegislators);
     } catch (error) {
