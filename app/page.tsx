@@ -7,7 +7,9 @@ import "@aws-amplify/ui-react/styles.css";
 import { apiService, Legislator } from "./api";
 import { useState } from "react";
 import CrimeChart from "./components/CrimeChart";
+import { seedUsAveragesCache } from "./utils/usCensusCache";
 import CensusChart from "./components/CensusChart";
+import { useEffect } from "react";
 
 Amplify.configure(awsExports);
 
@@ -43,6 +45,19 @@ export default function Home() {
   const [findReps, setFindReps] = useState<boolean>(false);
   const [crimeData, setCrimeData] = useState<CrimeDataPoint[]>([]);
   const [censusData, setCensusData] = useState<CensusDataPoint[]>([]);
+
+  // Seed US averages cache once the user is authenticated and page renders on client
+  // Authenticator wraps this page, so render implies signed in; additionally guard with getCurrentUser
+  useEffect(() => {
+    (async () => {
+      try {
+        await getCurrentUser();
+        seedUsAveragesCache([2021, 2022, 2023]);
+      } catch {
+        // not signed in; do nothing
+      }
+    })();
+  }, []);
   const getLegislators = async (address: string) => {
     try {
       const token = await getTokens();

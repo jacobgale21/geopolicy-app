@@ -11,6 +11,7 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import { getUsAveragesFromCache, getUsAverages } from "../utils/usCensusCache";
 
 interface CensusDataPoint {
   year: number;
@@ -40,6 +41,18 @@ export default function CensusChart({ data, state }: CensusChartProps) {
   // Sort data by year to ensure proper chronological order
   const sortedData = [...data].sort((a, b) => a.year - b.year);
 
+  // Merge US averages per year into the dataset for overlay series
+  const mergedData = sortedData.map((d) => {
+    const us = getUsAveragesFromCache(d.year) ?? getUsAverages(d.year);
+    return {
+      ...d,
+      poverty_rate_us: us?.poverty_rate ?? null,
+      educational_us: us?.educational ?? null,
+      income_mean_us: us?.income_mean ?? null,
+      income_median_us: us?.income_median ?? null,
+    };
+  });
+
   return (
     <div className="bg-white rounded-lg p-6 shadow-lg">
       <div className="mb-6">
@@ -62,7 +75,7 @@ export default function CensusChart({ data, state }: CensusChartProps) {
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
-                data={sortedData}
+                data={mergedData}
                 margin={{
                   top: 5,
                   right: 30,
@@ -80,8 +93,12 @@ export default function CensusChart({ data, state }: CensusChartProps) {
                   label={{
                     value: "Poverty Rate (%)",
                     angle: -90,
-                    position: "insideMiddle",
+                    position: "outsideLeft",
+                    offset: -10,
+                    dx: -15, // shift further left
+                    style: { textAnchor: "middle" },
                   }}
+                  width={50}
                   tick={{ fontSize: 12 }}
                 />
                 <Tooltip
@@ -109,6 +126,15 @@ export default function CensusChart({ data, state }: CensusChartProps) {
                   dot={{ fill: "#dc2626", strokeWidth: 2, r: 5 }}
                   activeDot={{ r: 7, stroke: "#dc2626", strokeWidth: 2 }}
                 />
+                <Line
+                  type="monotone"
+                  dataKey="poverty_rate_us"
+                  name="US Average"
+                  stroke="#9ca3af"
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  dot={false}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -122,7 +148,7 @@ export default function CensusChart({ data, state }: CensusChartProps) {
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
-                data={sortedData}
+                data={mergedData}
                 margin={{
                   top: 5,
                   right: 30,
@@ -140,8 +166,12 @@ export default function CensusChart({ data, state }: CensusChartProps) {
                   label={{
                     value: "Education Level (%)",
                     angle: -90,
-                    position: "insideMiddle",
+                    position: "outsideLeft",
+                    offset: -10,
+                    dx: -15, // shift further left
+                    style: { textAnchor: "middle" },
                   }}
+                  width={50}
                   tick={{ fontSize: 12 }}
                 />
                 <Tooltip
@@ -169,6 +199,15 @@ export default function CensusChart({ data, state }: CensusChartProps) {
                   dot={{ fill: "#059669", strokeWidth: 2, r: 5 }}
                   activeDot={{ r: 7, stroke: "#059669", strokeWidth: 2 }}
                 />
+                <Line
+                  type="monotone"
+                  dataKey="educational_us"
+                  name="US Average"
+                  stroke="#9ca3af"
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  dot={false}
+                />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -182,7 +221,7 @@ export default function CensusChart({ data, state }: CensusChartProps) {
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={sortedData}
+                data={mergedData}
                 margin={{
                   top: 5,
                   right: 30,
@@ -200,8 +239,12 @@ export default function CensusChart({ data, state }: CensusChartProps) {
                   label={{
                     value: "Mean Income ($)",
                     angle: -90,
-                    position: "insideMiddle",
+                    position: "outsideLeft",
+                    offset: -10,
+                    dx: -25, // shift further left
+                    style: { textAnchor: "middle" },
                   }}
+                  width={50}
                   tick={{ fontSize: 12 }}
                   tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
                 />
@@ -230,6 +273,15 @@ export default function CensusChart({ data, state }: CensusChartProps) {
                   fill="#3b82f6"
                   radius={[4, 4, 0, 0]}
                 />
+                <Line
+                  type="monotone"
+                  dataKey="income_mean_us"
+                  name="US Average"
+                  stroke="#6b7280"
+                  strokeWidth={2}
+                  strokeDasharray="4 4"
+                  dot={false}
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -243,7 +295,7 @@ export default function CensusChart({ data, state }: CensusChartProps) {
           <div className="h-80">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={sortedData}
+                data={mergedData}
                 margin={{
                   top: 5,
                   right: 30,
@@ -261,8 +313,12 @@ export default function CensusChart({ data, state }: CensusChartProps) {
                   label={{
                     value: "Median Income ($)",
                     angle: -90,
-                    position: "insideMiddle",
+                    position: "outsideLeft",
+                    offset: 0,
+                    dx: -25, // shift further left
+                    style: { textAnchor: "middle" }, // keeps it centered nicely
                   }}
+                  width={50}
                   tick={{ fontSize: 12 }}
                   tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
                 />
@@ -290,6 +346,15 @@ export default function CensusChart({ data, state }: CensusChartProps) {
                   dataKey="income_median"
                   fill="#7c3aed"
                   radius={[4, 4, 0, 0]}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="income_median_us"
+                  name="US Average"
+                  stroke="#6b7280"
+                  strokeWidth={2}
+                  strokeDasharray="4 4"
+                  dot={false}
                 />
               </BarChart>
             </ResponsiveContainer>
