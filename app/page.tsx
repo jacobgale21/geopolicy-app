@@ -7,6 +7,7 @@ import "@aws-amplify/ui-react/styles.css";
 import { apiService, Legislator } from "./api";
 import { useState } from "react";
 import CrimeChart from "./components/CrimeChart";
+import CensusChart from "./components/CensusChart";
 
 Amplify.configure(awsExports);
 
@@ -28,12 +29,20 @@ interface CrimeDataPoint {
   crime_counts: number;
 }
 
+interface CensusDataPoint {
+  year: number;
+  poverty_rate: number;
+  educational: number;
+  income_mean: number;
+  income_median: number;
+}
 export default function Home() {
   const [legislators, setLegislators] = useState<Legislator[]>([]);
   const [selectedState, setSelectedState] = useState<string>("");
   const [address, setAddress] = useState<string>("");
   const [findReps, setFindReps] = useState<boolean>(false);
   const [crimeData, setCrimeData] = useState<CrimeDataPoint[]>([]);
+  const [censusData, setCensusData] = useState<CensusDataPoint[]>([]);
   const getLegislators = async (address: string) => {
     try {
       const token = await getTokens();
@@ -55,6 +64,21 @@ export default function Home() {
         crime_counts: item[1],
       }));
       setCrimeData([...crimeData, ...newData]);
+      const censusDataResponse = await apiService.getCensusData(
+        gotlegislators[0].state,
+        token
+      );
+      console.log(censusDataResponse);
+      const newCensusData = censusDataResponse.map(
+        (item: [string, number, number, number, number, number]) => ({
+          year: item[1],
+          poverty_rate: item[2],
+          educational: item[3],
+          income_mean: item[4],
+          income_median: item[5],
+        })
+      );
+      setCensusData([...censusData, ...newCensusData]);
     } catch (error) {
       console.error("Error fetching legislators:", error);
     }
@@ -114,6 +138,7 @@ export default function Home() {
                   setFindReps(false);
                   setLegislators([]);
                   setCrimeData([]);
+                  setCensusData([]);
                 }}
                 placeholder="e.g., 1600 Pennsylvania Ave NW, Washington, DC 20500"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-black bg-white"
@@ -211,6 +236,13 @@ export default function Home() {
                   state={selectedState}
                   crimeType="Homicide"
                 />
+              </div>
+            )}
+
+            {/* Census Data Chart */}
+            {censusData.length > 0 && (
+              <div className="mt-8 border-t pt-6">
+                <CensusChart data={censusData} state={selectedState} />
               </div>
             )}
           </div>
