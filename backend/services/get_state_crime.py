@@ -33,6 +33,18 @@ def get_state_assault_counts(state, full_state, start_year, end_year):
         year_total[int(key[3:])] += round(float(value)/12.0, 2)
     return year_total
 
+def get_us_assault_counts(start_year, end_year):
+    # Can get any state and pull national assault counts from api request
+    url = f"https://api.usa.gov/crime/fbi/cde/summarized/state/FL/ASS?from=01-{start_year}&to=12-{end_year}&API_KEY={os.getenv('FBI_API_KEY')}"
+    response = requests.get(url)
+    data = response.json()
+    temp = data['offenses']['rates']['United States']
+    year_total = {year: 0.0 for year in range(start_year, end_year + 1)}
+    for key, value in temp.items():
+        year_total[int(key[3:])] += round(float(value)/12.0, 2)
+    return year_total
+
+
 def insert_crime_data(conn, state, crime_counts, crime_type):
     try:
         cur = conn.cursor()
@@ -125,16 +137,17 @@ def main():
             'WY': 'Wyoming',
         }
         # with connection_scope() as conn:
-        #     for key, value in states.items():
-        #         state = key
-        #         full_state = value
-        #         crime_type = 'Homicide'
-        #         homicide_counts = get_state_murder_counts(state, full_state, 2021, 2024)
-        #         insert_crime_data(conn, full_state, homicide_counts, crime_type)
-        #     cur = conn.cursor()
-        #     cur.execute('SELECT * FROM CrimeData WHERE crime_type = %s', ('Homicide',))
-        #     print(cur.fetchall())
-        #     cur.close()
+            # for key, value in states.items():
+            # state = key
+            # full_state = value
+            # crime_type = 'Assault'
+            # full_state = 'United States'
+            # homicide_counts = get_us_assault_counts(2021, 2024)
+            # insert_crime_data(conn, full_state, homicide_counts, crime_type)
+            # cur = conn.cursor()
+            # cur.execute('SELECT * FROM CrimeData WHERE crime_type = %s and state = %s', ('Assault', 'United States'))
+            # print(cur.fetchall())
+            # cur.close()
 
             # cur = conn.cursor()
             # cur.execute('DROP TABLE IF EXISTS CrimeData')
@@ -145,6 +158,6 @@ def main():
     except Error as error:
         print(error)
 
-if __name__ == "__main__":
+# if __name__ == "__main__":
     
-    main()
+#     main()

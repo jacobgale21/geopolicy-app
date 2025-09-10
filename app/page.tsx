@@ -149,7 +149,7 @@ export default function Home() {
               Welcome to GeoPolicy
             </h2>
             <p className="text-gray-600 mb-6">
-              Select your state to discover your representatives
+              Discover your representatives and state statistics
             </p>
 
             <div className="mb-6">

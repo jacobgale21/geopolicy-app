@@ -1,5 +1,6 @@
 "use client";
 import React, { useMemo, useState } from "react";
+import usData from "../utils/us_census_data.json";
 import {
   LineChart,
   Line,
@@ -67,11 +68,16 @@ export default function CrimeChart({
 
   const rate = selectedType.toLowerCase() !== "homicide";
 
-  // Transform data for Recharts
-  const chartData = current.map((item) => ({
-    year: item.year,
-    count: item.crime_counts,
-  }));
+  // Transform data for Recharts and merge national assault rates from cache when available
+  const chartData = current.map((item) => {
+    const yearKey = String(item.year);
+    const nationalAssault = (usData as Record<string, any>)[yearKey]?.assault;
+    return {
+      year: item.year,
+      count: item.crime_counts,
+      us_assault: typeof nationalAssault === "number" ? nationalAssault : null,
+    };
+  });
 
   return (
     <div>
@@ -181,6 +187,17 @@ export default function CrimeChart({
                 dot={{ fill: "#9333ea", strokeWidth: 2, r: 4 }}
                 activeDot={{ r: 6, stroke: "#9333ea", strokeWidth: 2 }}
               />
+              {selectedType.toLowerCase() === "assault" && (
+                <Line
+                  type="monotone"
+                  dataKey="us_assault"
+                  name="US Assault Rate"
+                  stroke="#9ca3af"
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  dot={false}
+                />
+              )}
             </LineChart>
           </ResponsiveContainer>
         </div>
