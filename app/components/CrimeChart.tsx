@@ -11,7 +11,7 @@ import {
 } from "recharts";
 
 interface CrimeDataPoint {
-  month_year: string;
+  year: string;
   crime_counts: number;
 }
 
@@ -39,7 +39,7 @@ export default function CrimeChart({
 
   // Transform data for Recharts - it expects an array of objects with consistent property names
   const chartData = data.map((item) => ({
-    month: item.month_year,
+    year: item.year,
     count: item.crime_counts,
   }));
 
@@ -49,8 +49,8 @@ export default function CrimeChart({
         <h3 className="text-lg font-semibold text-gray-900">
           {crimeType} Trends in {state}
         </h3>
-        <p className="text-sm text-gray-600 mt-1">
-          Data points: {data.length} months
+        <p className="text-sm font-bold text-gray-600 mt-1">
+          {data[0].year} - {data[data.length - 1].year}
         </p>
       </div>
       <div className="h-80">
@@ -66,7 +66,7 @@ export default function CrimeChart({
           >
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis
-              dataKey="month"
+              dataKey="year"
               tick={{ fontSize: 12 }}
               angle={-45}
               textAnchor="end"
@@ -76,12 +76,15 @@ export default function CrimeChart({
               label={{
                 value: "Number of Incidents",
                 angle: -90,
-                position: "insideMiddle",
+                position: "outsideLeft",
+                offset: 0,
+                dx: -25, // shift further left
+                style: { textAnchor: "middle" },
               }}
               tick={{ fontSize: 12 }}
             />
             <Tooltip
-              labelFormatter={(value) => `Month: ${value}`}
+              labelFormatter={(value) => `Year: ${value}`}
               formatter={(value, name) => [value, `${crimeType} Count`]}
               contentStyle={{
                 backgroundColor: "white",

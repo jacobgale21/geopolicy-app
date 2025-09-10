@@ -47,5 +47,9 @@ def translate_state(state):
         'UT': 'Utah',
         'VT': 'Vermont',
         'VA': 'Virginia',
+        'WA': 'Washington',
+        'WV': 'West Virginia',
+        'WI': 'Wisconsin',
+        'WY': 'Wyoming',
     }
     return states[state]

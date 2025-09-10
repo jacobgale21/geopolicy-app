@@ -27,7 +27,7 @@ async function getTokens() {
 }
 
 interface CrimeDataPoint {
-  month_year: string;
+  year: string;
   crime_counts: number;
 }
 
@@ -73,11 +73,13 @@ export default function Home() {
       );
       setSelectedState(gotlegislators[0].state);
       setLegislators(gotlegislators);
-
-      const newData = crimeDataResponse.map((item: [string, number]) => ({
-        month_year: item[0],
-        crime_counts: item[1],
-      }));
+      console.log(crimeDataResponse);
+      const newData = crimeDataResponse.map(
+        (item: [number, string, string, number, number]) => ({
+          year: item[4],
+          crime_counts: item[3],
+        })
+      );
       setCrimeData([...crimeData, ...newData]);
       const censusDataResponse = await apiService.getCensusData(
         gotlegislators[0].state,
@@ -179,7 +181,7 @@ export default function Home() {
                   {legislators.map((legislator, index) => (
                     <div
                       key={index}
-                      className="bg-gray-50 rounded-lg p-4 border border-gray-200 text-center"
+                      className="bg-white rounded-lg p-6 shadow-lg"
                     >
                       <div className="flex flex-col items-center">
                         <h4 className="font-bold text-gray-900 text-lg mb-3">
@@ -243,21 +245,21 @@ export default function Home() {
               </div>
             )}
 
+            {/* Census Data Chart */}
+            {censusData.length > 0 && (
+              <div className="mt-6 pt-4">
+                <CensusChart data={censusData} state={selectedState} />
+              </div>
+            )}
+
             {/* Crime Data Chart */}
             {crimeData.length > 0 && (
-              <div className="mt-8 border-t pt-6">
+              <div className="mt-6 pt-4">
                 <CrimeChart
                   data={crimeData}
                   state={selectedState}
                   crimeType="Homicide"
                 />
-              </div>
-            )}
-
-            {/* Census Data Chart */}
-            {censusData.length > 0 && (
-              <div className="mt-8 border-t pt-6">
-                <CensusChart data={censusData} state={selectedState} />
               </div>
             )}
           </div>

@@ -145,22 +145,20 @@ def get_state_census_data(conn, state):
         return result
         
 
-def main():
-    try:
-        with connection_scope() as conn:
-            # response = get_us_census_response(conn)
-            # write_us_census_json(response, "us_census_data.json")
-            # response = get_state_census_response(2021)
-            # organized_data = organize_response_data(response)
-            # insert_state_census_data(conn, organized_data, 2021)
-            # result = get_state_census_data(conn, 'California')
-            # for year in range(2021, 2024):
-            #     response = get_us_census_response(year)
-            #     insert_us_census_data(conn, response, year)
-            # get_CPI_response()
+# def main():
+    # try:
+    #     # with connection_scope() as conn:
+    #         # response = get_us_census_response(conn)
+    #         # write_us_census_json(response, "us_census_data.json")
+    #         # response = get_state_census_response(2021)
+    #         # organized_data = organize_response_data(response)
+    #         # insert_state_census_data(conn, organized_data, 2021)
+    #         # result = get_state_census_data(conn, 'California')
+    #         # for year in range(2021, 2024):
+    #         #     response = get_us_census_response(year)
+    #         #     insert_us_census_data(conn, response, year)
+    #         # get_CPI_response()
             
-    except Error as error:
-        print(error)
+    # except Error as error:
+    #     print(error)
 
-if __name__ == "__main__":
-    main()
