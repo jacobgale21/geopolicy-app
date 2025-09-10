@@ -23,6 +23,16 @@ def get_state_murder_counts(state, full_state, start_year, end_year):
         year_total[int(key[3:])] += value
     return year_total
 
+def get_state_assault_counts(state, full_state, start_year, end_year):
+    url = f"https://api.usa.gov/crime/fbi/cde/summarized/state/{state}/ASS?from=01-{start_year}&to=12-{end_year}&API_KEY={os.getenv('FBI_API_KEY')}"
+    response = requests.get(url)
+    data = response.json()
+    temp = data['offenses']['rates'][full_state]
+    year_total = {year: 0.0 for year in range(start_year, end_year + 1)}
+    for key, value in temp.items():
+        year_total[int(key[3:])] += round(float(value)/12.0, 2)
+    return year_total
+
 def insert_crime_data(conn, state, crime_counts, crime_type):
     try:
         cur = conn.cursor()
@@ -31,9 +41,9 @@ def insert_crime_data(conn, state, crime_counts, crime_type):
                 id SERIAL PRIMARY KEY,
                 state VARCHAR(20) NOT NULL,
                 crime_type VARCHAR(20) NOT NULL,
-                crime_counts INT NOT NULL,
+                crime_counts FLOAT NOT NULL,
                 year INT NOT NULL,
-                UNIQUE(state, year)  -- Prevent duplicate state and year
+                UNIQUE(state, year, crime_type)  -- Prevent duplicate state and year
             )
         """)
         for key, value in crime_counts.items():
@@ -48,10 +58,15 @@ def insert_crime_data(conn, state, crime_counts, crime_type):
 
 
 def get_crime_data(conn, state, crime_type):
-    print(state, crime_type)
     cur = conn.cursor()
     cur.execute("SELECT * FROM CrimeData WHERE state = %s AND crime_type = %s ORDER BY year ASC", (state, crime_type))
     return cur.fetchall()
+
+def get_all_state_crime(conn, state):
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM CrimeData WHERE state = %s ORDER BY year ASC", (state,))
+    return cur.fetchall()
+
 
 
 def main():
@@ -110,21 +125,26 @@ def main():
             'WY': 'Wyoming',
         }
         # with connection_scope() as conn:
-            # for key, value in states.items():
-            #     state = key
-            #     full_state = value
-            #     crime_type = 'Homicide'
-            #     murder_counts = get_state_murder_counts(state, full_state, 2021, 2024)
-            #     insert_crime_data(conn, full_state, murder_counts, crime_type)
+        #     for key, value in states.items():
+        #         state = key
+        #         full_state = value
+        #         crime_type = 'Homicide'
+        #         homicide_counts = get_state_murder_counts(state, full_state, 2021, 2024)
+        #         insert_crime_data(conn, full_state, homicide_counts, crime_type)
+        #     cur = conn.cursor()
+        #     cur.execute('SELECT * FROM CrimeData WHERE crime_type = %s', ('Homicide',))
+        #     print(cur.fetchall())
+        #     cur.close()
+
             # cur = conn.cursor()
-            # cur.execute('SELECT * FROM CrimeData')
-            # print(cur.fetchall())
+            # cur.execute('DROP TABLE IF EXISTS CrimeData')
+            # conn.commit()
             # cur.close()
             
            
     except Error as error:
         print(error)
 
-# if __name__ == "__main__":
+if __name__ == "__main__":
     
-#     main()
+    main()

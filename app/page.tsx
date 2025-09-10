@@ -43,7 +43,8 @@ export default function Home() {
   const [selectedState, setSelectedState] = useState<string>("");
   const [address, setAddress] = useState<string>("");
   const [findReps, setFindReps] = useState<boolean>(false);
-  const [crimeData, setCrimeData] = useState<CrimeDataPoint[]>([]);
+  const [homicideData, setHomicideData] = useState<CrimeDataPoint[]>([]);
+  const [assaultData, setAssaultData] = useState<CrimeDataPoint[]>([]);
   const [censusData, setCensusData] = useState<CensusDataPoint[]>([]);
 
   // Seed US averages cache once the user is authenticated and page renders on client
@@ -66,21 +67,33 @@ export default function Home() {
         return;
       }
       const gotlegislators = await apiService.getLegislators(address, token);
-      const crimeDataResponse = await apiService.getCrimeData(
+      const crimeDataResponse = await apiService.getAllStateCrime(
         gotlegislators[0].state,
-        "Homicide",
         token
       );
       setSelectedState(gotlegislators[0].state);
       setLegislators(gotlegislators);
       console.log(crimeDataResponse);
-      const newData = crimeDataResponse.map(
-        (item: [number, string, string, number, number]) => ({
+      const newHomicideData = crimeDataResponse
+        .filter(
+          (item: [number, string, string, number, number]) =>
+            item[2].toLowerCase() === "homicide"
+        )
+        .map((item: [number, string, string, number, number]) => ({
           year: item[4],
           crime_counts: item[3],
-        })
-      );
-      setCrimeData([...crimeData, ...newData]);
+        }));
+      const newAssaultData = crimeDataResponse
+        .filter(
+          (item: [number, string, string, number, number]) =>
+            item[2].toLowerCase() === "assault"
+        )
+        .map((item: [number, string, string, number, number]) => ({
+          year: item[4],
+          crime_counts: item[3],
+        }));
+      setHomicideData([...homicideData, ...newHomicideData]);
+      setAssaultData([...assaultData, ...newAssaultData]);
       const censusDataResponse = await apiService.getCensusData(
         gotlegislators[0].state,
         token
@@ -154,7 +167,8 @@ export default function Home() {
                   setAddress(e.target.value);
                   setFindReps(false);
                   setLegislators([]);
-                  setCrimeData([]);
+                  setHomicideData([]);
+                  setAssaultData([]);
                   setCensusData([]);
                 }}
                 placeholder="e.g., 1600 Pennsylvania Ave NW, Washington, DC 20500"
@@ -253,11 +267,13 @@ export default function Home() {
             )}
 
             {/* Crime Data Chart */}
-            {crimeData.length > 0 && (
+            {homicideData.length > 0 && (
               <div className="mt-6 pt-4">
                 <CrimeChart
-                  data={crimeData}
+                  data={homicideData}
                   state={selectedState}
+                  homicideData={homicideData}
+                  assaultData={assaultData}
                   crimeType="Homicide"
                 />
               </div>

@@ -53,6 +53,21 @@ class ApiService {
     const data: any = await response.json();
     return data;
   }
+  async getAllStateCrime(state: string, token: string): Promise<any> {
+    const url = `${this.baseUrl}/get_all_state_crime/${state}`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to fetch crime data");
+    }
+    const data: any = await response.json();
+    return data;
+  }
   async getCensusData(state: string, token: string): Promise<any> {
     const url = `${this.baseUrl}/get_census_data/${state}`;
     const response = await fetch(url, {
