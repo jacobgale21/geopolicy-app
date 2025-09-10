@@ -1,20 +1,23 @@
 {
-    "2021": {
-        "poverty_rate": 9.1,
-        "educational": 89.4,
-        "income_mean": 97962.0,
-        "income_median": 69717.0
-    },
-    "2022": {
-        "poverty_rate": 8.9,
-        "educational": 89.6,
-        "income_mean": 105555.0,
-        "income_median": 74755.0
-    },
-    "2023": {
-        "poverty_rate": 8.8,
-        "educational": 89.8,
-        "income_mean": 109160.0,
-        "income_median": 77719.0
-    }
+  "2021": {
+    "poverty_rate": 9.1,
+    "educational": 89.4,
+    "income_mean": 97962.0,
+    "income_median": 69717.0,
+    "cpi_yoy": 4.69
+  },
+  "2022": {
+    "poverty_rate": 8.9,
+    "educational": 89.6,
+    "income_mean": 105555.0,
+    "income_median": 74755.0,
+    "cpi_yoy": 8.01
+  },
+  "2023": {
+    "poverty_rate": 8.8,
+    "educational": 89.8,
+    "income_mean": 109160.0,
+    "income_median": 77719.0,
+    "cpi_yoy": 4.14
+  }
 }

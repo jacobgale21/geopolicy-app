@@ -8,7 +8,8 @@ import psycopg2
 from psycopg2 import Error
 import matplotlib.pyplot as plt
 import json
-
+import pandas as pd
+from datetime import datetime
 # Add parent directory to path to import db module
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from db import connection_scope
@@ -27,6 +28,43 @@ def get_us_census_response(year: int):
     url = f"https://api.census.gov/data/{year}/acs/acs1/profile?get=NAME,DP03_0119PE,DP02_0067PE,DP03_0063E,DP03_0062E,DP03_0097PE,DP03_0098PE&for=us:*"
     response = requests.get(url)
     return response
+
+# Get consumer price index data
+def get_CPI_response():
+    # Set the headers and data for the API request
+    headers = {'Content-type': 'application/json'}
+    data = json.dumps({
+    "seriesid": ['CUUR0000SA0'],
+    "startyear": "2020",
+    "endyear": "2024"
+    })
+
+    # Send the request to the BLS API
+    json_data = requests.post('https://api.bls.gov/publicAPI/v2/timeseries/data/', data=data, headers=headers).json()
+    data_list = []
+    for series in json_data['Results']['series']:
+        seriesId = series['seriesID']
+        for item in series['data']:
+            data_list.append({
+                'Series ID': seriesId,
+                'Year': int(item['year']),
+                'Month': item['period'],
+                'value': float(item['value'])
+            })
+
+    # Create the DataFrame
+    df = pd.DataFrame(data_list)
+    df['Date'] = df['Year'].astype(str) + df['Month']
+    df.index = df['Date'].apply(lambda x: datetime.strptime(x, '%YM%m'))
+    df.sort_index(inplace=True)
+    df_cpi = df[(df['Series ID'] == 'CUUR0000SA0')]
+    # Calculate both YoY and MoM inflation
+    cpi_yoy = df_cpi['value'].pct_change(periods=12) * 100  # Year-over-year
+    result = {}
+    for year in range(2021, 2024):
+        print(f"Average YoY Inflation for {year}: {cpi_yoy[str(year)].mean():.2f}%")
+        result[year] = cpi_yoy[str(year)].mean()
+    return result
 
 def organize_response_data(response):
     result = {} 
@@ -110,8 +148,8 @@ def get_state_census_data(conn, state):
 def main():
     try:
         with connection_scope() as conn:
-            response = get_us_census_response(conn)
-            write_us_census_json(response, "us_census_data.json")
+            # response = get_us_census_response(conn)
+            # write_us_census_json(response, "us_census_data.json")
             # response = get_state_census_response(2021)
             # organized_data = organize_response_data(response)
             # insert_state_census_data(conn, organized_data, 2021)
@@ -119,6 +157,7 @@ def main():
             # for year in range(2021, 2024):
             #     response = get_us_census_response(year)
             #     insert_us_census_data(conn, response, year)
+            # get_CPI_response()
             
     except Error as error:
         print(error)

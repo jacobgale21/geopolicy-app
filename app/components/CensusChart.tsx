@@ -59,9 +59,8 @@ export default function CensusChart({ data, state }: CensusChartProps) {
         <h3 className="text-2xl font-bold text-gray-900 mb-2">
           Census Data Trends for {state}
         </h3>
-        <p className="text-sm text-gray-600">
-          Data points: {data.length} years ({sortedData[0]?.year} -{" "}
-          {sortedData[sortedData.length - 1]?.year})
+        <p className="text-sm font-bold text-gray-800 ">
+          {sortedData[0]?.year} - {sortedData[sortedData.length - 1]?.year}
         </p>
       </div>
 
@@ -362,7 +361,7 @@ export default function CensusChart({ data, state }: CensusChartProps) {
         </div>
       </div>
 
-      {/* Summary Statistics */}
+      {/* State Summary Statistics */}
       <div className="mt-8 pt-6 border-t border-gray-200">
         <h4 className="text-lg font-semibold text-gray-800 mb-4">
           Summary Statistics
@@ -464,6 +463,129 @@ export default function CensusChart({ data, state }: CensusChartProps) {
                 </>
               )}
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* State vs National Comparison */}
+      <div className="mt-4 pt-2">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {/* Poverty Rate Comparison */}
+          <div className="bg-orange-50 p-4 rounded-lg">
+            <p className="text-sm text-orange-600 font-medium">
+              Poverty Rate Change
+            </p>
+            <p className="text-2xl font-bold text-orange-800">
+              {sortedData.length > 1
+                ? (() => {
+                    const stateChange =
+                      sortedData[sortedData.length - 1]?.poverty_rate -
+                      sortedData[0]?.poverty_rate;
+                    const usFirst =
+                      getUsAveragesFromCache(sortedData[0]?.year) ??
+                      getUsAverages(sortedData[0]?.year);
+                    const usLast =
+                      getUsAveragesFromCache(
+                        sortedData[sortedData.length - 1]?.year
+                      ) ??
+                      getUsAverages(sortedData[sortedData.length - 1]?.year);
+                    const usChange =
+                      (usLast?.poverty_rate ?? 0) -
+                      (usFirst?.poverty_rate ?? 0);
+                    const difference = stateChange - usChange;
+                    return `${difference > 0 ? "+" : ""}${difference.toFixed(1)}%`;
+                  })()
+                : "N/A"}
+            </p>
+            <p className="text-xs text-orange-600">vs National Change</p>
+          </div>
+
+          {/* Education Comparison */}
+          <div className="bg-teal-50 p-4 rounded-lg">
+            <p className="text-sm text-teal-600 font-medium">
+              Education Change
+            </p>
+            <p className="text-2xl font-bold text-teal-800">
+              {sortedData.length > 1
+                ? (() => {
+                    const stateChange =
+                      sortedData[sortedData.length - 1]?.educational -
+                      sortedData[0]?.educational;
+                    const usFirst =
+                      getUsAveragesFromCache(sortedData[0]?.year) ??
+                      getUsAverages(sortedData[0]?.year);
+                    const usLast =
+                      getUsAveragesFromCache(
+                        sortedData[sortedData.length - 1]?.year
+                      ) ??
+                      getUsAverages(sortedData[sortedData.length - 1]?.year);
+                    const usChange =
+                      (usLast?.educational ?? 0) - (usFirst?.educational ?? 0);
+                    const difference = stateChange - usChange;
+                    return `${difference > 0 ? "+" : ""}${difference.toFixed(1)}%`;
+                  })()
+                : "N/A"}
+            </p>
+            <p className="text-xs text-teal-600">vs National Change</p>
+          </div>
+
+          {/* Mean Income Comparison */}
+          <div className="bg-indigo-50 p-4 rounded-lg">
+            <p className="text-sm text-indigo-600 font-medium">
+              Mean Income Change
+            </p>
+            <p className="text-2xl font-bold text-indigo-800">
+              {sortedData.length > 1
+                ? (() => {
+                    const stateChange =
+                      sortedData[sortedData.length - 1]?.income_mean -
+                      sortedData[0]?.income_mean;
+                    const usFirst =
+                      getUsAveragesFromCache(sortedData[0]?.year) ??
+                      getUsAverages(sortedData[0]?.year);
+                    const usLast =
+                      getUsAveragesFromCache(
+                        sortedData[sortedData.length - 1]?.year
+                      ) ??
+                      getUsAverages(sortedData[sortedData.length - 1]?.year);
+                    const usChange =
+                      (usLast?.income_mean ?? 0) - (usFirst?.income_mean ?? 0);
+                    const difference = stateChange - usChange;
+                    return `${difference > 0 ? "+" : ""}$${(difference / 1000).toFixed(0)}k`;
+                  })()
+                : "N/A"}
+            </p>
+            <p className="text-xs text-indigo-600">vs National Change</p>
+          </div>
+
+          {/* Median Income Comparison */}
+          <div className="bg-violet-50 p-4 rounded-lg">
+            <p className="text-sm text-violet-600 font-medium">
+              Median Income Change
+            </p>
+            <p className="text-2xl font-bold text-violet-800">
+              {sortedData.length > 1
+                ? (() => {
+                    const stateChange =
+                      sortedData[sortedData.length - 1]?.income_median -
+                      sortedData[0]?.income_median;
+                    const usFirst =
+                      getUsAveragesFromCache(sortedData[0]?.year) ??
+                      getUsAverages(sortedData[0]?.year);
+                    const usLast =
+                      getUsAveragesFromCache(
+                        sortedData[sortedData.length - 1]?.year
+                      ) ??
+                      getUsAverages(sortedData[sortedData.length - 1]?.year);
+                    const usChange =
+                      (usLast?.income_median ?? 0) -
+                      (usFirst?.income_median ?? 0);
+                    const difference = stateChange - usChange;
+                    return `${difference > 0 ? "+" : ""}$${(difference / 1000).toFixed(0)}k`;
+                  })()
+                : "N/A"}
+            </p>
+            <p className="text-xs text-violet-600">vs National Change</p>
           </div>
         </div>
       </div>
