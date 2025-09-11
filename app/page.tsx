@@ -5,13 +5,9 @@ import { Authenticator } from "@aws-amplify/ui-react";
 import awsExports from "../src/aws-exports";
 import "@aws-amplify/ui-react/styles.css";
 import { apiService, Legislator } from "./api";
-import { useState } from "react";
-import CrimeChart from "./components/CrimeChart";
 import { seedUsAveragesCache } from "./utils/usCensusCache";
-import CensusChart from "./components/CensusChart";
-import TaxCalculator from "./components/TaxCalculator";
-import GovernmentSpendingChart from "./components/GovernmentSpendingChart";
-import { useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { useAddress } from "./context/AddressContext";
 
 Amplify.configure(awsExports);
 
@@ -59,17 +55,9 @@ interface GovernmentSpendingChartProps {
 export default function Home() {
   const [legislators, setLegislators] = useState<Legislator[]>([]);
   const [selectedState, setSelectedState] = useState<string>("");
-  const [address, setAddress] = useState<string>("");
   const [findReps, setFindReps] = useState<boolean>(false);
-  const [homicideData, setHomicideData] = useState<CrimeDataPoint[]>([]);
-  const [assaultData, setAssaultData] = useState<CrimeDataPoint[]>([]);
-  const [censusData, setCensusData] = useState<CensusDataPoint[]>([]);
-  const [governmentSpendingData, setGovernmentSpendingData] =
-    useState<GovernmentSpendingData | null>(null);
-  const [budgetFunctionsData, setBudgetFunctionsData] = useState<
-    SpendingData[]
-  >([]);
-  const [agencyData, setAgencyData] = useState<SpendingData[]>([]);
+  const { address, setAddress, setState } = useAddress();
+
   // Seed US averages cache once the user is authenticated and page renders on client
   // Authenticator wraps this page, so render implies signed in; additionally guard with getCurrentUser
   useEffect(() => {
@@ -77,43 +65,6 @@ export default function Home() {
       try {
         await getCurrentUser();
         seedUsAveragesCache([2021, 2022, 2023]);
-
-        // Fetch government spending data
-        const token = await getTokens();
-        if (token) {
-          try {
-            const spendingData = await apiService.getAgencySpending(token);
-            // console.log(spendingData);
-            const budgetFunctions = spendingData.budget_functions_data.map(
-              (item: [string, number, number]) => ({
-                name: item[0],
-                amount: item[1],
-                percent_budget: item[2],
-              })
-            );
-            setBudgetFunctionsData([
-              ...budgetFunctionsData,
-              ...budgetFunctions,
-            ]);
-            const agency = spendingData.agency_data.map(
-              (item: [string, number, number]) => ({
-                name: item[0],
-                amount: item[1],
-                percent_budget: item[2],
-              })
-            );
-            setAgencyData(agency);
-
-            const governmentSpending = {
-              agency_data: agency,
-              budget_functions_data: budgetFunctions,
-            };
-            setGovernmentSpendingData(governmentSpending);
-            console.log(governmentSpending);
-          } catch (error) {
-            console.error("Failed to fetch government spending data:", error);
-          }
-        }
       } catch {
         // not signed in; do nothing
       }
@@ -127,48 +78,9 @@ export default function Home() {
         return;
       }
       const gotlegislators = await apiService.getLegislators(address, token);
-      const crimeDataResponse = await apiService.getAllStateCrime(
-        gotlegislators[0].state,
-        token
-      );
       setSelectedState(gotlegislators[0].state);
+      setState(gotlegislators[0].state);
       setLegislators(gotlegislators);
-      console.log(crimeDataResponse);
-      const newHomicideData = crimeDataResponse
-        .filter(
-          (item: [number, string, string, number, number]) =>
-            item[2].toLowerCase() === "homicide"
-        )
-        .map((item: [number, string, string, number, number]) => ({
-          year: item[4],
-          crime_counts: item[3],
-        }));
-      const newAssaultData = crimeDataResponse
-        .filter(
-          (item: [number, string, string, number, number]) =>
-            item[2].toLowerCase() === "assault"
-        )
-        .map((item: [number, string, string, number, number]) => ({
-          year: item[4],
-          crime_counts: item[3],
-        }));
-      setHomicideData([...homicideData, ...newHomicideData]);
-      setAssaultData([...assaultData, ...newAssaultData]);
-      const censusDataResponse = await apiService.getCensusData(
-        gotlegislators[0].state,
-        token
-      );
-      console.log(censusDataResponse);
-      const newCensusData = censusDataResponse.map(
-        (item: [string, number, number, number, number, number]) => ({
-          year: item[1],
-          poverty_rate: item[2],
-          educational: item[3],
-          income_mean: item[4],
-          income_median: item[5],
-        })
-      );
-      setCensusData([...censusData, ...newCensusData]);
     } catch (error) {
       console.error("Error fetching legislators:", error);
     }
@@ -198,7 +110,7 @@ export default function Home() {
     },
   };
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100 flex items-center justify-center p-4 pt-14">
       <div className="w-full max-w-2xl">
         <Authenticator
           components={components}
@@ -227,9 +139,6 @@ export default function Home() {
                   setAddress(e.target.value);
                   setFindReps(false);
                   setLegislators([]);
-                  setHomicideData([]);
-                  setAssaultData([]);
-                  setCensusData([]);
                 }}
                 placeholder="e.g., 1600 Pennsylvania Ave NW, Washington, DC 20500"
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-black bg-white"
@@ -316,38 +225,6 @@ export default function Home() {
                   No senators found for {selectedState}. Please try another
                   state.
                 </p>
-              </div>
-            )}
-
-            {/* Census Data Chart */}
-            {censusData.length > 0 && (
-              <div className="mt-6 pt-4">
-                <CensusChart data={censusData} state={selectedState} />
-              </div>
-            )}
-
-            {/* Crime Data Chart */}
-            {homicideData.length > 0 && (
-              <div className="mt-6 pt-4">
-                <CrimeChart
-                  data={homicideData}
-                  state={selectedState}
-                  homicideData={homicideData}
-                  assaultData={assaultData}
-                  crimeType="Homicide"
-                />
-              </div>
-            )}
-
-            {/* Tax Calculator */}
-            <div className="mt-6 pt-4">
-              <TaxCalculator />
-            </div>
-
-            {/* Government Spending Chart */}
-            {governmentSpendingData && (
-              <div className="mt-6 pt-4">
-                <GovernmentSpendingChart data={governmentSpendingData} />
               </div>
             )}
           </div>

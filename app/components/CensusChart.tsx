@@ -56,10 +56,10 @@ export default function CensusChart({ data, state }: CensusChartProps) {
   return (
     <div className="bg-white rounded-lg p-6 shadow-lg">
       <div className="mb-6">
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">
+        <h3 className="text-2xl font-bold text-gray-900 mb-2 text-center">
           Census Data Trends for {state}
         </h3>
-        <p className="text-sm font-bold text-gray-800 ">
+        <p className="text-sm font-bold text-gray-800 text-center">
           {sortedData[0]?.year} - {sortedData[sortedData.length - 1]?.year}
         </p>
       </div>
@@ -363,16 +363,18 @@ export default function CensusChart({ data, state }: CensusChartProps) {
 
       {/* State Summary Statistics */}
       <div className="mt-8 pt-6 border-t border-gray-200">
-        <h4 className="text-lg font-semibold text-gray-800 mb-4">
+        <h4 className="text-lg font-semibold text-gray-800 mb-4 text-center">
           Summary Statistics
         </h4>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="bg-red-50 p-4 rounded-lg">
-            <p className="text-sm text-red-600 font-medium">Poverty Rate</p>
-            <p className="text-2xl font-bold text-red-800">
+            <p className="text-sm text-red-600 font-medium text-center">
+              Poverty Rate
+            </p>
+            <p className="text-2xl font-bold text-red-800 text-center">
               {sortedData[sortedData.length - 1]?.poverty_rate?.toFixed(1)}%
             </p>
-            <p className="text-xs text-red-600">
+            <p className="text-xs text-red-600 text-center">
               {sortedData.length > 1 && (
                 <>
                   {sortedData[sortedData.length - 1]?.poverty_rate >
@@ -390,11 +392,13 @@ export default function CensusChart({ data, state }: CensusChartProps) {
           </div>
 
           <div className="bg-green-50 p-4 rounded-lg">
-            <p className="text-sm text-green-600 font-medium">Education</p>
-            <p className="text-2xl font-bold text-green-800">
+            <p className="text-sm text-green-600 font-medium text-center">
+              Education
+            </p>
+            <p className="text-2xl font-bold text-green-800 text-center">
               {sortedData[sortedData.length - 1]?.educational?.toFixed(1)}%
             </p>
-            <p className="text-xs text-green-600">
+            <p className="text-xs text-green-600 text-center">
               {sortedData.length > 1 && (
                 <>
                   {sortedData[sortedData.length - 1]?.educational >
@@ -412,15 +416,17 @@ export default function CensusChart({ data, state }: CensusChartProps) {
           </div>
 
           <div className="bg-blue-50 p-4 rounded-lg">
-            <p className="text-sm text-blue-600 font-medium">Mean Income</p>
-            <p className="text-2xl font-bold text-blue-800">
+            <p className="text-sm text-blue-600 font-medium text-center">
+              Mean Income
+            </p>
+            <p className="text-2xl font-bold text-blue-800 text-center">
               $
               {(sortedData[sortedData.length - 1]?.income_mean / 1000).toFixed(
                 0
               )}
               k
             </p>
-            <p className="text-xs text-blue-600">
+            <p className="text-xs text-blue-600 text-center">
               {sortedData.length > 1 && (
                 <>
                   {sortedData[sortedData.length - 1]?.income_mean >
@@ -439,15 +445,17 @@ export default function CensusChart({ data, state }: CensusChartProps) {
           </div>
 
           <div className="bg-purple-50 p-4 rounded-lg">
-            <p className="text-sm text-purple-600 font-medium">Median Income</p>
-            <p className="text-2xl font-bold text-purple-800">
+            <p className="text-sm text-purple-600 font-medium text-center">
+              Median Income
+            </p>
+            <p className="text-2xl font-bold text-purple-800 text-center">
               $
               {(
                 sortedData[sortedData.length - 1]?.income_median / 1000
               ).toFixed(0)}
               k
             </p>
-            <p className="text-xs text-purple-600">
+            <p className="text-xs text-purple-600 text-center">
               {sortedData.length > 1 && (
                 <>
                   {sortedData[sortedData.length - 1]?.income_median >
@@ -472,10 +480,10 @@ export default function CensusChart({ data, state }: CensusChartProps) {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {/* Poverty Rate Comparison */}
           <div className="bg-orange-50 p-4 rounded-lg">
-            <p className="text-sm text-orange-600 font-medium">
+            <p className="text-sm text-orange-600 font-medium text-center">
               Poverty Rate Change
             </p>
-            <p className="text-2xl font-bold text-orange-800">
+            <p className="text-2xl font-bold text-orange-800 text-center">
               {sortedData.length > 1
                 ? (() => {
                     const stateChange =
@@ -497,15 +505,17 @@ export default function CensusChart({ data, state }: CensusChartProps) {
                   })()
                 : "N/A"}
             </p>
-            <p className="text-xs text-orange-600">vs National Change</p>
+            <p className="text-xs text-orange-600 text-center">
+              vs National Change
+            </p>
           </div>
 
           {/* Education Comparison */}
           <div className="bg-teal-50 p-4 rounded-lg">
-            <p className="text-sm text-teal-600 font-medium">
+            <p className="text-sm text-teal-600 font-medium text-center">
               Education Change
             </p>
-            <p className="text-2xl font-bold text-teal-800">
+            <p className="text-2xl font-bold text-teal-800 text-center">
               {sortedData.length > 1
                 ? (() => {
                     const stateChange =
@@ -526,19 +536,22 @@ export default function CensusChart({ data, state }: CensusChartProps) {
                   })()
                 : "N/A"}
             </p>
-            <p className="text-xs text-teal-600">vs National Change</p>
+            <p className="text-xs text-teal-600 text-center">
+              vs National Change
+            </p>
           </div>
 
           {/* Mean Income Comparison */}
           <div className="bg-indigo-50 p-4 rounded-lg">
-            <p className="text-sm text-indigo-600 font-medium">
+            <p className="text-sm text-indigo-600 font-medium text-center">
               Mean Income Change
             </p>
-            <p className="text-2xl font-bold text-indigo-800">
+            <p className="text-2xl font-bold text-indigo-800 text-center">
               {sortedData.length > 1
                 ? (() => {
                     const stateChange =
-                      sortedData[sortedData.length - 1]?.income_mean -
+                      (sortedData[sortedData.length - 1]?.income_mean -
+                        sortedData[0]?.income_mean) /
                       sortedData[0]?.income_mean;
                     const usFirst =
                       getUsAveragesFromCache(sortedData[0]?.year) ??
@@ -549,25 +562,30 @@ export default function CensusChart({ data, state }: CensusChartProps) {
                       ) ??
                       getUsAverages(sortedData[sortedData.length - 1]?.year);
                     const usChange =
-                      (usLast?.income_mean ?? 0) - (usFirst?.income_mean ?? 0);
+                      ((usLast?.income_mean ?? 0) -
+                        (usFirst?.income_mean ?? 0)) /
+                      (usFirst?.income_mean ?? 0);
                     const difference = stateChange - usChange;
-                    return `${difference > 0 ? "+" : ""}$${(difference / 1000).toFixed(0)}k`;
+                    return `${difference > 0 ? "+" : ""}${(difference * 100).toFixed(2)}%`;
                   })()
                 : "N/A"}
             </p>
-            <p className="text-xs text-indigo-600">vs National Change</p>
+            <p className="text-xs text-indigo-600 text-center">
+              vs National Change
+            </p>
           </div>
 
           {/* Median Income Comparison */}
           <div className="bg-violet-50 p-4 rounded-lg">
-            <p className="text-sm text-violet-600 font-medium">
+            <p className="text-sm text-violet-600 font-medium text-center">
               Median Income Change
             </p>
-            <p className="text-2xl font-bold text-violet-800">
+            <p className="text-2xl font-bold text-violet-800 text-center">
               {sortedData.length > 1
                 ? (() => {
                     const stateChange =
-                      sortedData[sortedData.length - 1]?.income_median -
+                      (sortedData[sortedData.length - 1]?.income_median -
+                        sortedData[0]?.income_median) /
                       sortedData[0]?.income_median;
                     const usFirst =
                       getUsAveragesFromCache(sortedData[0]?.year) ??
@@ -578,14 +596,17 @@ export default function CensusChart({ data, state }: CensusChartProps) {
                       ) ??
                       getUsAverages(sortedData[sortedData.length - 1]?.year);
                     const usChange =
-                      (usLast?.income_median ?? 0) -
+                      ((usLast?.income_median ?? 0) -
+                        (usFirst?.income_median ?? 0)) /
                       (usFirst?.income_median ?? 0);
                     const difference = stateChange - usChange;
-                    return `${difference > 0 ? "+" : ""}$${(difference / 1000).toFixed(0)}k`;
+                    return `${difference > 0 ? "+" : ""}${(difference * 100).toFixed(2)}%`;
                   })()
                 : "N/A"}
             </p>
-            <p className="text-xs text-violet-600">vs National Change</p>
+            <p className="text-xs text-violet-600 text-center">
+              vs National Change
+            </p>
           </div>
         </div>
       </div>

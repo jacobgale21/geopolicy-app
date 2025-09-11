@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import RequireAuth from "./components/RequireAuth";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import AddressProvider from "./context/AddressContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,7 +30,95 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
+          <div className="max-w-7xl mx-auto px-4">
+            <div className="h-12 flex items-center justify-between relative">
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-semibold text-purple-700">
+                  GeoPolicy
+                </span>
+              </div>
+              {/* Top Navigation Board - centered */}
+              <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
+                <Link
+                  href="/"
+                  className="group relative flex items-center gap-2 px-3 py-2 rounded-md border-transparent hover:border-gray-500 hover:bg-gray-200"
+                  title="Representatives"
+                >
+                  <span className="text-xl" aria-hidden>
+                    🏛️
+                  </span>
+                  <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-1 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow">
+                    Representatives
+                  </span>
+                </Link>
+                <Link
+                  href="/health"
+                  className="group relative flex items-center gap-2 px-3 py-2 rounded-md border-transparent hover:border-gray-500 hover:bg-gray-200"
+                  title="Health"
+                >
+                  <span className="text-xl" aria-hidden>
+                    🏥
+                  </span>
+                  <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-1 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow">
+                    Health
+                  </span>
+                </Link>
+                <Link
+                  href="/spending"
+                  className="group relative flex items-center gap-2 px-3 py-2 rounded-md border-transparent hover:border-gray-500 hover:bg-gray-200"
+                  title="Spending"
+                >
+                  <span className="text-xl" aria-hidden>
+                    💰
+                  </span>
+                  <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-1 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow">
+                    Money
+                  </span>
+                </Link>
+                <Link
+                  href="/legislation"
+                  className="group relative flex items-center gap-2 px-3 py-2 rounded-md border-transparent hover:border-gray-500 hover:bg-gray-200"
+                  title="Legislation"
+                >
+                  <span className="text-xl" aria-hidden>
+                    📜
+                  </span>
+                  <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-1 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow">
+                    Legislation
+                  </span>
+                </Link>
+                <Link
+                  href="/law-enforcement"
+                  className="group relative flex items-center gap-2 px-3 py-2 rounded-md border-transparent hover:border-gray-500 hover:bg-gray-200"
+                  title="Law Enforcement"
+                >
+                  <span className="text-xl" aria-hidden>
+                    🚓
+                  </span>
+                  <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-1 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow whitespace-nowrap">
+                    Law Enforcement
+                  </span>
+                </Link>
+                <Link
+                  href="/state_stats"
+                  className="group relative flex items-center gap-2 px-3 py-2 rounded-md border-transparent hover:border-gray-500 hover:bg-gray-200"
+                  title="State Stats"
+                >
+                  <span className="text-xl" aria-hidden>
+                    🏢
+                  </span>
+                  <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-1 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow whitespace-nowrap">
+                    State Stats
+                  </span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </nav>
+        <RequireAuth>
+          <AddressProvider>{children}</AddressProvider>
+        </RequireAuth>
       </body>
     </html>
   );

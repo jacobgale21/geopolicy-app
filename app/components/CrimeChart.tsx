@@ -107,10 +107,10 @@ export default function CrimeChart({
 
       <div className="bg-white border border-gray-200 rounded-b-lg shadow-lg p-6 -mt-px">
         <div className="mb-4">
-          <h3 className="text-lg font-semibold text-gray-900">
+          <h3 className="text-lg font-semibold text-gray-900 text-center">
             {selectedType} Trends in {state}
           </h3>
-          <p className="text-sm font-bold text-gray-600 mt-1">
+          <p className="text-sm font-bold text-gray-600 mt-1 text-center">
             {data[0].year} - {data[data.length - 1].year}
           </p>
         </div>
