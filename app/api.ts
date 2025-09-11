@@ -13,6 +13,17 @@ export interface Legislator {
 export interface LegislatorResponse {
   legislators: Legislator[];
 }
+
+export interface SpendingData {
+  name: string;
+  amount: number;
+  percent_budget: number;
+}
+
+export interface GovernmentSpendingData {
+  agency_data: SpendingData[];
+  budget_functions_data: SpendingData[];
+}
 class ApiService {
   private baseUrl: string;
   constructor(baseUrl: string) {
@@ -79,6 +90,21 @@ class ApiService {
     if (!response.ok) {
       const error = await response.json();
       throw new Error(error.message || "Failed to fetch census data");
+    }
+    const data: any = await response.json();
+    return data;
+  }
+  async getAgencySpending(token: string): Promise<any> {
+    const url = `${this.baseUrl}/get_agency_spending`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to fetch agency spending");
     }
     const data: any = await response.json();
     return data;

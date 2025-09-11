@@ -9,6 +9,8 @@ import { useState } from "react";
 import CrimeChart from "./components/CrimeChart";
 import { seedUsAveragesCache } from "./utils/usCensusCache";
 import CensusChart from "./components/CensusChart";
+import TaxCalculator from "./components/TaxCalculator";
+import GovernmentSpendingChart from "./components/GovernmentSpendingChart";
 import { useEffect } from "react";
 
 Amplify.configure(awsExports);
@@ -38,6 +40,22 @@ interface CensusDataPoint {
   income_mean: number;
   income_median: number;
 }
+
+interface SpendingData {
+  name: string;
+  amount: number;
+  percent_budget: number;
+}
+
+interface GovernmentSpendingData {
+  agency_data: SpendingData[];
+  budget_functions_data: SpendingData[];
+}
+
+interface GovernmentSpendingChartProps {
+  data: GovernmentSpendingData;
+}
+
 export default function Home() {
   const [legislators, setLegislators] = useState<Legislator[]>([]);
   const [selectedState, setSelectedState] = useState<string>("");
@@ -46,7 +64,12 @@ export default function Home() {
   const [homicideData, setHomicideData] = useState<CrimeDataPoint[]>([]);
   const [assaultData, setAssaultData] = useState<CrimeDataPoint[]>([]);
   const [censusData, setCensusData] = useState<CensusDataPoint[]>([]);
-
+  const [governmentSpendingData, setGovernmentSpendingData] =
+    useState<GovernmentSpendingData | null>(null);
+  const [budgetFunctionsData, setBudgetFunctionsData] = useState<
+    SpendingData[]
+  >([]);
+  const [agencyData, setAgencyData] = useState<SpendingData[]>([]);
   // Seed US averages cache once the user is authenticated and page renders on client
   // Authenticator wraps this page, so render implies signed in; additionally guard with getCurrentUser
   useEffect(() => {
@@ -54,6 +77,43 @@ export default function Home() {
       try {
         await getCurrentUser();
         seedUsAveragesCache([2021, 2022, 2023]);
+
+        // Fetch government spending data
+        const token = await getTokens();
+        if (token) {
+          try {
+            const spendingData = await apiService.getAgencySpending(token);
+            // console.log(spendingData);
+            const budgetFunctions = spendingData.budget_functions_data.map(
+              (item: [string, number, number]) => ({
+                name: item[0],
+                amount: item[1],
+                percent_budget: item[2],
+              })
+            );
+            setBudgetFunctionsData([
+              ...budgetFunctionsData,
+              ...budgetFunctions,
+            ]);
+            const agency = spendingData.agency_data.map(
+              (item: [string, number, number]) => ({
+                name: item[0],
+                amount: item[1],
+                percent_budget: item[2],
+              })
+            );
+            setAgencyData(agency);
+
+            const governmentSpending = {
+              agency_data: agency,
+              budget_functions_data: budgetFunctions,
+            };
+            setGovernmentSpendingData(governmentSpending);
+            console.log(governmentSpending);
+          } catch (error) {
+            console.error("Failed to fetch government spending data:", error);
+          }
+        }
       } catch {
         // not signed in; do nothing
       }
@@ -276,6 +336,18 @@ export default function Home() {
                   assaultData={assaultData}
                   crimeType="Homicide"
                 />
+              </div>
+            )}
+
+            {/* Tax Calculator */}
+            <div className="mt-6 pt-4">
+              <TaxCalculator />
+            </div>
+
+            {/* Government Spending Chart */}
+            {governmentSpendingData && (
+              <div className="mt-6 pt-4">
+                <GovernmentSpendingChart data={governmentSpendingData} />
               </div>
             )}
           </div>
