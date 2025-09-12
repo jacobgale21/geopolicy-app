@@ -8,12 +8,6 @@ import { apiService } from "../api";
 import { useEffect } from "react";
 import { useAddress } from "../context/AddressContext";
 import CensusChart from "../components/CensusChart";
-import CrimeChart from "../components/CrimeChart";
-
-interface CrimeDataPoint {
-  year: string;
-  crime_counts: number;
-}
 
 interface CensusDataPoint {
   year: number;
@@ -77,8 +71,6 @@ const STATES = [
 ];
 
 export default function SpendingPage() {
-  const [homicideData, setHomicideData] = useState<CrimeDataPoint[]>([]);
-  const [assaultData, setAssaultData] = useState<CrimeDataPoint[]>([]);
   const [censusData, setCensusData] = useState<CensusDataPoint[]>([]);
   const { state, setState } = useAddress();
   useEffect(() => {
@@ -105,30 +97,6 @@ export default function SpendingPage() {
                 })
               );
               setCensusData(newCensusData);
-              const crimeDataResponse = await apiService.getAllStateCrime(
-                state,
-                token
-              );
-              const newHomicideData = crimeDataResponse
-                .filter(
-                  (item: [number, string, string, number, number]) =>
-                    item[2].toLowerCase() === "homicide"
-                )
-                .map((item: [number, string, string, number, number]) => ({
-                  year: item[4],
-                  crime_counts: item[3],
-                }));
-              const newAssaultData = crimeDataResponse
-                .filter(
-                  (item: [number, string, string, number, number]) =>
-                    item[2].toLowerCase() === "assault"
-                )
-                .map((item: [number, string, string, number, number]) => ({
-                  year: item[4],
-                  crime_counts: item[3],
-                }));
-              setHomicideData(newHomicideData);
-              setAssaultData(newAssaultData);
             }
           } catch (error) {
             console.error("Failed to fetch government spending data:", error);
@@ -171,19 +139,6 @@ export default function SpendingPage() {
         {censusData.length > 0 && (
           <div className="mt-6 pt-4">
             <CensusChart data={censusData} state={state} />
-          </div>
-        )}
-
-        {/* Crime Data Chart */}
-        {homicideData.length > 0 && (
-          <div className="mt-6 pt-4">
-            <CrimeChart
-              data={homicideData}
-              state={state}
-              homicideData={homicideData}
-              assaultData={assaultData}
-              crimeType="Homicide"
-            />
           </div>
         )}
       </div>
