@@ -124,84 +124,84 @@ export default function GovernmentSpendingChart({
   const totalSpending = currentData.reduce((sum, item) => sum + item.amount, 0);
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 max-w-6xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-        Government Spending Analysis
-      </h2>
-
-      {/* Tabs */}
-      <div className="flex justify-center mb-6">
-        <div className="inline-flex border border-gray-200 bg-white overflow-hidden rounded-lg">
+    <div>
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-6xl mx-auto mb-6">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+          Where is your Money Going?
+        </h2>
+        {/* Tabs */}
+        <div className="flex justify-center gap-3 mb-6">
           <button
             onClick={() => setActiveTab("agencies")}
-            className={`px-6 py-3 text-sm font-medium ${
+            className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-lg ${
               activeTab === "agencies"
-                ? "bg-purple-600 text-white"
-                : "text-gray-700 hover:bg-gray-50"
+                ? "bg-purple-600 text-white border-purple-600"
+                : "text-gray-700 hover:bg-gray-50 bg-white"
             }`}
           >
             Federal Agencies
           </button>
           <button
             onClick={() => setActiveTab("budget_functions")}
-            className={`px-6 py-3 text-sm font-medium ${
+            className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-lg ${
               activeTab === "budget_functions"
-                ? "bg-purple-600 text-white"
-                : "text-gray-700 hover:bg-gray-50"
+                ? "bg-purple-600 text-white border-purple-600"
+                : "text-gray-700 hover:bg-gray-50 bg-white"
             }`}
           >
             Budget Functions
           </button>
         </div>
-      </div>
 
-      <div className="space-y-10">
-        {/* Pie Chart */}
-        <div className="space-y-6">
-          <h3 className="text-xl font-semibold text-gray-800 text-center">
-            {title} Distribution
-          </h3>
-          <div className="h-[525px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={chartData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  //   label={({ percent }) => `${(percent || 0).toFixed(1)}%`}
-                  outerRadius={180}
-                  fill="#8884d8"
-                  dataKey="percent_budget"
-                >
-                  {chartData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.fill} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(value: number, name: string, props: any) => [
-                    `${props.payload.name}: ${value.toFixed(1)}%`,
-                  ]}
-                  contentStyle={{
-                    backgroundColor: "white",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                    fontSize: "14px",
-                  }}
-                />
-                <Legend
-                  wrapperStyle={{
-                    paddingTop: "20px",
-                    fontSize: "14px",
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+        <div className="space-y-10">
+          {/* Pie Chart */}
+          <div className="space-y-6">
+            <h3 className="text-lg font-semibold text-gray-800 text-center">
+              {title} Distribution
+            </h3>
+            <div className="h-[525px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={chartData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    //   label={({ percent }) => `${(percent || 0).toFixed(1)}%`}
+                    outerRadius={180}
+                    fill="#8884d8"
+                    dataKey="percent_budget"
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.fill} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    formatter={(value: number, name: string, props: any) => [
+                      `${props.payload.name}: ${value.toFixed(1)}%`,
+                    ]}
+                    contentStyle={{
+                      backgroundColor: "white",
+                      border: "1px solid #e5e7eb",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                      fontSize: "14px",
+                    }}
+                  />
+                  <Legend
+                    wrapperStyle={{
+                      paddingTop: "20px",
+                      fontSize: "14px",
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
-
-        {/* Bar Chart */}
+      </div>
+      {/* Bar Chart */}
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-6xl mx-auto mb-6">
         <div className="space-y-2">
           <h3 className="text-xl font-semibold text-gray-800 text-center">
             {title} by Amount
@@ -249,58 +249,59 @@ export default function GovernmentSpendingChart({
           </div>
         </div>
       </div>
-
       {/* Summary Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-gray-50 rounded-lg p-6 text-center">
-          <h4 className="text-sm font-medium text-gray-600 mb-2">
-            Total Spending
-          </h4>
-          <p className="text-2xl font-bold text-gray-900">
-            {formatCurrency(totalSpending)}
-          </p>
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-6xl mx-auto mb-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-gray-50 rounded-lg p-6 text-center">
+            <h4 className="text-sm font-medium text-gray-600 mb-2">
+              Total Spending
+            </h4>
+            <p className="text-2xl font-bold text-gray-900">
+              {formatCurrency(totalSpending)}
+            </p>
+          </div>
+          <div className="bg-gray-50 rounded-lg p-6 text-center">
+            <h4 className="text-sm font-medium text-gray-600 mb-2">
+              Largest Share
+            </h4>
+            <p className="text-lg font-bold text-gray-900">
+              {processedData[0]?.name}
+            </p>
+            <p className="text-sm text-gray-600">
+              {formatPercentage(processedData[0]?.percent_budget || 0)}
+            </p>
+          </div>
         </div>
-        <div className="bg-gray-50 rounded-lg p-6 text-center">
-          <h4 className="text-sm font-medium text-gray-600 mb-2">
-            Largest Share
-          </h4>
-          <p className="text-lg font-bold text-gray-900">
-            {processedData[0]?.name}
-          </p>
-          <p className="text-sm text-gray-600">
-            {formatPercentage(processedData[0]?.percent_budget || 0)}
-          </p>
-        </div>
-      </div>
 
-      {/* Top 5 List */}
-      <div className="mt-6">
-        <h4 className="text-lg font-semibold text-gray-800 mb-4">
-          Top 5 {activeTab === "agencies" ? "Agencies" : "Budget Functions"}
-        </h4>
-        <div className="space-y-2">
-          {processedData.slice(0, 5).map((item, index) => (
-            <div
-              key={item.name}
-              className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-            >
-              <div className="flex items-center space-x-3">
-                <div
-                  className="w-4 h-4 rounded-full"
-                  style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                ></div>
-                <span className="font-medium text-gray-800">{item.name}</span>
+        {/* Top 5 List */}
+        <div className="mt-6">
+          <h4 className="text-lg font-semibold text-gray-800 mb-4">
+            Top 5 {activeTab === "agencies" ? "Agencies" : "Budget Functions"}
+          </h4>
+          <div className="space-y-2">
+            {processedData.slice(0, 5).map((item, index) => (
+              <div
+                key={item.name}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
+                <div className="flex items-center space-x-3">
+                  <div
+                    className="w-4 h-4 rounded-full"
+                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
+                  ></div>
+                  <span className="font-medium text-gray-800">{item.name}</span>
+                </div>
+                <div className="text-right">
+                  <p className="font-semibold text-gray-900">
+                    {formatCurrency(item.amount)}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    {formatPercentage(item.percent_budget)}
+                  </p>
+                </div>
               </div>
-              <div className="text-right">
-                <p className="font-semibold text-gray-900">
-                  {formatCurrency(item.amount)}
-                </p>
-                <p className="text-sm text-gray-600">
-                  {formatPercentage(item.percent_budget)}
-                </p>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </div>
