@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   PieChart,
   Pie,
@@ -110,7 +110,11 @@ function calculateTax(
   };
 }
 
-export default function TaxCalculator() {
+interface TaxCalculatorProps {
+  onTaxCalculated?: (taxAmount: number) => void;
+}
+
+export default function TaxCalculator({ onTaxCalculated }: TaxCalculatorProps) {
   const [income, setIncome] = useState<string>("");
   const [filingStatus, setFilingStatus] = useState<FilingStatus>("single");
 
@@ -121,6 +125,13 @@ export default function TaxCalculator() {
     }
     return calculateTax(incomeNum, filingStatus);
   }, [income, filingStatus]);
+
+  // Notify parent component when tax is calculated
+  useEffect(() => {
+    if (calculation && onTaxCalculated) {
+      onTaxCalculated(calculation.totalTax);
+    }
+  }, [calculation, onTaxCalculated]);
 
   const chartData = useMemo(() => {
     if (!calculation) return [];

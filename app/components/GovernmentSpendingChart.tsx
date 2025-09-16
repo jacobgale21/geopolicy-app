@@ -1,18 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Tooltip,
-  Legend,
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-} from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
+import { motion } from "framer-motion";
 
 interface SpendingData {
   name: string;
@@ -27,30 +16,21 @@ interface GovernmentSpendingData {
 
 interface GovernmentSpendingChartProps {
   data: GovernmentSpendingData;
+  userTax?: number; // User's calculated tax amount
 }
 
-// Color palette for charts
+// Color palette matching tax page style
 const COLORS = [
-  "#8884d8",
-  "#82ca9d",
-  "#ffc658",
-  "#ff7300",
-  "#00ff00",
-  "#ff00ff",
-  "#00ffff",
-  "#ff0000",
-  "#0000ff",
-  "#ffff00",
-  "#ffa500",
-  "#800080",
-  "#008000",
-  "#ff69b4",
-  "#40e0d0",
-  "#ee82ee",
-  "#90ee90",
-  "#f0e68c",
-  "#dda0dd",
-  "#98fb98",
+  "#2563eb",
+  "#16a34a",
+  "#eab308",
+  "#dc2626",
+  "#9333ea",
+  "#0891b2",
+  "#be123c",
+  "#7c3aed",
+  "#ea580c",
+  "#059669",
 ];
 
 const formatCurrency = (amount: number) => {
@@ -63,14 +43,18 @@ const formatCurrency = (amount: number) => {
 };
 
 const formatPercentage = (percentage: number) => {
-  return `${percentage.toFixed(2)}%`;
+  return `${percentage.toFixed(1)}%`;
 };
 
 export default function GovernmentSpendingChart({
   data,
+  userTax = 0,
 }: GovernmentSpendingChartProps) {
-  const [activeTab, setActiveTab] = useState<"agencies" | "budget_functions">(
-    "agencies"
+  const [activeBudgetIndex, setActiveBudgetIndex] = useState<number | null>(
+    null
+  );
+  const [activeAgencyIndex, setActiveAgencyIndex] = useState<number | null>(
+    null
   );
 
   if (
@@ -87,223 +71,242 @@ export default function GovernmentSpendingChart({
     );
   }
 
-  const currentData =
-    activeTab === "agencies" ? data.agency_data : data.budget_functions_data;
-  const title =
-    activeTab === "agencies"
-      ? "Federal Agency Spending"
-      : "Budget Functions Spending";
+  // Process data for display - take top 8 items and group the rest
+  const processData = (rawData: SpendingData[]) => {
+    const top8Data = rawData.slice(0, 8);
+    const otherData = rawData.slice(8);
 
-  // Sort data by percentage and take top 15, group the rest as "Other"
+    let processedData = [...top8Data];
+    if (otherData.length > 0) {
+      const otherTotal = otherData.reduce((sum, item) => sum + item.amount, 0);
+      const otherPercentage = otherData.reduce(
+        (sum, item) => sum + item.percent_budget,
+        0
+      );
+      processedData.push({
+        name: "Other",
+        amount: otherTotal,
+        percent_budget: otherPercentage,
+      });
+    }
 
-  const top15Data = currentData.slice(0, 15);
-  const otherData = currentData.slice(15);
+    return processedData.map((item, index) => ({
+      ...item,
+      color: COLORS[index % COLORS.length],
+    }));
+  };
 
-  // Calculate "Other" group if there are remaining agencies
-  let processedData = [...top15Data];
-  if (otherData.length > 0) {
-    const otherTotal = otherData.reduce((sum, item) => sum + item.amount, 0);
-    const otherPercentage = otherData.reduce(
-      (sum, item) => sum + item.percent_budget,
-      0
-    );
-    processedData.push({
-      name: "Other",
-      amount: otherTotal,
-      percent_budget: otherPercentage,
-    });
-  }
-
-  // Prepare chart data with colors
-  const chartData = processedData.map((item, index) => ({
-    ...item,
-    fill: COLORS[index % COLORS.length],
-  }));
-
-  // Calculate total spending
-  const totalSpending = currentData.reduce((sum, item) => sum + item.amount, 0);
+  const budgetFunctionsData = processData(data.budget_functions_data);
+  const agencyData = processData(data.agency_data);
 
   return (
-    <div>
-      <div className="bg-white rounded-lg shadow-lg p-6 max-w-6xl mx-auto mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-          Where is your Money Going?
-        </h2>
-        {/* Tabs */}
-        <div className="flex justify-center gap-3 mb-6">
-          <button
-            onClick={() => setActiveTab("agencies")}
-            className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-lg ${
-              activeTab === "agencies"
-                ? "bg-purple-600 text-white border-purple-600"
-                : "text-gray-700 hover:bg-gray-50 bg-white"
-            }`}
-          >
-            Federal Agencies
-          </button>
-          <button
-            onClick={() => setActiveTab("budget_functions")}
-            className={`px-4 py-2 text-sm font-medium border border-gray-200 rounded-lg ${
-              activeTab === "budget_functions"
-                ? "bg-purple-600 text-white border-purple-600"
-                : "text-gray-700 hover:bg-gray-50 bg-white"
-            }`}
-          >
-            Budget Functions
-          </button>
-        </div>
+    <section className="relative w-full min-h-screen bg-gray-50 flex flex-col items-center justify-center px-6 py-16">
+      {/* Title */}
+      <motion.h2
+        initial={{ opacity: 0, y: 40 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        viewport={{ once: true }}
+        className="text-3xl md:text-5xl font-bold text-gray-900 mb-6 text-center"
+      >
+        Here's how your{" "}
+        <span className="text-blue-600">${userTax.toLocaleString()}</span> is
+        spent
+      </motion.h2>
 
-        <div className="space-y-10">
-          {/* Pie Chart */}
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold text-gray-800 text-center">
-              {title} Distribution
-            </h3>
-            <div className="h-[525px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={chartData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    //   label={({ percent }) => `${(percent || 0).toFixed(1)}%`}
-                    outerRadius={180}
-                    fill="#8884d8"
-                    dataKey="percent_budget"
-                  >
-                    {chartData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.fill} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value: number, name: string, props: any) => [
-                      `${props.payload.name}: ${value.toFixed(1)}%`,
-                    ]}
-                    contentStyle={{
-                      backgroundColor: "white",
-                      border: "1px solid #e5e7eb",
-                      borderRadius: "8px",
-                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                      fontSize: "14px",
-                    }}
-                  />
-                  <Legend
-                    wrapperStyle={{
-                      paddingTop: "20px",
-                      fontSize: "14px",
-                    }}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Bar Chart */}
-      <div className="bg-white rounded-lg shadow-lg p-6 max-w-6xl mx-auto mb-6">
-        <div className="space-y-2">
-          <h3 className="text-xl font-semibold text-gray-800 text-center">
-            {title} by Amount
-          </h3>
-          <div className="h-[500px] w-full">
+      {/* Budget Functions Section */}
+      <div className="w-full max-w-4xl mb-16">
+        <motion.h3
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className="text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center"
+        >
+          Budget Functions
+        </motion.h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+          {/* Budget Functions Chart */}
+          <div className="h-[400px] flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={chartData.slice(0, 10)} // Show top 10 items
-                margin={{
-                  top: 20,
-                  right: 30,
-                  left: 20,
-                  bottom: 120,
-                }}
-              >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="name"
-                  angle={-45}
-                  textAnchor="end"
-                  height={120}
-                  interval={0}
-                  tick={{ fontSize: 12 }}
-                />
-                <YAxis
-                  tickFormatter={(value) => `$${(value / 1e12).toFixed(1)}T`}
-                  tick={{ fontSize: 14 }}
-                />
+              <PieChart>
+                <Pie
+                  data={budgetFunctionsData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={80}
+                  outerRadius={120}
+                  dataKey="percent_budget"
+                  paddingAngle={3}
+                  onMouseEnter={(_, index) => setActiveBudgetIndex(index)}
+                  onMouseLeave={() => setActiveBudgetIndex(null)}
+                >
+                  {budgetFunctionsData.map((entry, index) => (
+                    <Cell
+                      key={`budget-cell-${index}`}
+                      fill={entry.color}
+                      stroke={activeBudgetIndex === index ? "#111827" : "#fff"}
+                      strokeWidth={activeBudgetIndex === index ? 3 : 1}
+                    />
+                  ))}
+                </Pie>
                 <Tooltip
-                  formatter={(value: number) => [
-                    formatCurrency(value),
-                    "Amount",
+                  formatter={(value: number, name: string, props: any) => [
+                    userTax > 0
+                      ? `${((value / 100) * userTax).toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        })} (${value.toFixed(1)}%)`
+                      : `${value.toFixed(1)}%`,
+                    props.payload.name,
                   ]}
-                  contentStyle={{
-                    backgroundColor: "white",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "8px",
-                    boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                    fontSize: "14px",
-                  }}
                 />
-                <Bar dataKey="amount" fill="#8884d8" />
-              </BarChart>
+              </PieChart>
             </ResponsiveContainer>
           </div>
-        </div>
-      </div>
-      {/* Summary Statistics */}
-      <div className="bg-white rounded-lg shadow-lg p-6 max-w-6xl mx-auto mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gray-50 rounded-lg p-6 text-center">
-            <h4 className="text-sm font-medium text-gray-600 mb-2">
-              Total Spending
-            </h4>
-            <p className="text-2xl font-bold text-gray-900">
-              {formatCurrency(totalSpending)}
-            </p>
-          </div>
-          <div className="bg-gray-50 rounded-lg p-6 text-center">
-            <h4 className="text-sm font-medium text-gray-600 mb-2">
-              Largest Share
-            </h4>
-            <p className="text-lg font-bold text-gray-900">
-              {processedData[0]?.name}
-            </p>
-            <p className="text-sm text-gray-600">
-              {formatPercentage(processedData[0]?.percent_budget || 0)}
-            </p>
-          </div>
-        </div>
 
-        {/* Top 5 List */}
-        <div className="mt-6">
-          <h4 className="text-lg font-semibold text-gray-800 mb-4">
-            Top 5 {activeTab === "agencies" ? "Agencies" : "Budget Functions"}
-          </h4>
-          <div className="space-y-2">
-            {processedData.slice(0, 5).map((item, index) => (
-              <div
+          {/* Budget Functions Narration */}
+          <div className="space-y-6">
+            {budgetFunctionsData.map((item, index) => (
+              <motion.div
                 key={item.name}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                initial={{ opacity: 0, x: 40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="bg-white p-4 rounded-2xl shadow-md transition-all hover:shadow-lg"
               >
-                <div className="flex items-center space-x-3">
-                  <div
-                    className="w-4 h-4 rounded-full"
-                    style={{ backgroundColor: COLORS[index % COLORS.length] }}
-                  ></div>
-                  <span className="font-medium text-gray-800">{item.name}</span>
-                </div>
-                <div className="text-right">
-                  <p className="font-semibold text-gray-900">
-                    {formatCurrency(item.amount)}
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {formatPercentage(item.percent_budget)}
-                  </p>
-                </div>
-              </div>
+                <h3 className="font-semibold text-lg text-gray-800">
+                  {item.name}
+                </h3>
+                <p className="text-gray-600">
+                  About{" "}
+                  <span className="font-bold text-gray-900">
+                    {item.percent_budget.toFixed(1)}%
+                  </span>{" "}
+                  of your taxes →{" "}
+                  <span className="font-bold text-blue-600">
+                    {userTax > 0
+                      ? ((item.percent_budget / 100) * userTax).toLocaleString(
+                          "en-US",
+                          {
+                            style: "currency",
+                            currency: "USD",
+                          }
+                        )
+                      : formatCurrency(item.amount)}
+                  </span>
+                </p>
+              </motion.div>
             ))}
           </div>
         </div>
       </div>
-    </div>
+
+      {/* Agency Spending Section */}
+      <div className="w-full max-w-4xl">
+        <motion.h3
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+          className="text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center"
+        >
+          Federal Agency Spending
+        </motion.h3>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+          {/* Agency Chart */}
+          <div className="h-[400px] flex items-center justify-center">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={agencyData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={80}
+                  outerRadius={120}
+                  dataKey="percent_budget"
+                  paddingAngle={3}
+                  onMouseEnter={(_, index) => setActiveAgencyIndex(index)}
+                  onMouseLeave={() => setActiveAgencyIndex(null)}
+                >
+                  {agencyData.map((entry, index) => (
+                    <Cell
+                      key={`agency-cell-${index}`}
+                      fill={entry.color}
+                      stroke={activeAgencyIndex === index ? "#111827" : "#fff"}
+                      strokeWidth={activeAgencyIndex === index ? 3 : 1}
+                    />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value: number, name: string, props: any) => [
+                    userTax > 0
+                      ? `${((value / 100) * userTax).toLocaleString("en-US", {
+                          style: "currency",
+                          currency: "USD",
+                        })} (${value.toFixed(1)}%)`
+                      : `${value.toFixed(1)}%`,
+                    props.payload.name,
+                  ]}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Agency Narration */}
+          <div className="space-y-6">
+            {agencyData.map((item, index) => (
+              <motion.div
+                key={item.name}
+                initial={{ opacity: 0, x: 40 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                viewport={{ once: true }}
+                className="bg-white p-4 rounded-2xl shadow-md transition-all hover:shadow-lg"
+              >
+                <h3 className="font-semibold text-lg text-gray-800">
+                  {item.name}
+                </h3>
+                <p className="text-gray-600">
+                  About{" "}
+                  <span className="font-bold text-gray-900">
+                    {item.percent_budget.toFixed(1)}%
+                  </span>{" "}
+                  of your taxes →{" "}
+                  <span className="font-bold text-blue-600">
+                    {userTax > 0
+                      ? ((item.percent_budget / 100) * userTax).toLocaleString(
+                          "en-US",
+                          {
+                            style: "currency",
+                            currency: "USD",
+                          }
+                        )
+                      : formatCurrency(item.amount)}
+                  </span>
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Additional Info */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.3 }}
+        viewport={{ once: true }}
+        className="mt-12 text-center max-w-2xl"
+      >
+        <p className="text-gray-600 text-lg">
+          These charts show how your federal tax dollars are allocated across
+          budget functions and which specific agencies receive the funding.
+        </p>
+      </motion.div>
+    </section>
   );
 }

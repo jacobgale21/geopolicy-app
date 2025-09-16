@@ -26,6 +26,7 @@ export default function SpendingPage() {
     SpendingData[]
   >([]);
   const [agencyData, setAgencyData] = useState<SpendingData[]>([]);
+  const [userTaxAmount, setUserTaxAmount] = useState<number>(0);
   useEffect(() => {
     (async () => {
       try {
@@ -74,20 +75,21 @@ export default function SpendingPage() {
     })();
   }, []);
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100 flex items-center justify-center p-4 pt-14">
-      <div className="w-full max-w-2xl">
-        {/* Tax Calculator */}
-        <div className="mt-6 pt-4">
-          <TaxCalculator />
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100">
+      {/* Tax Calculator */}
+      <div className="flex items-center justify-center p-4 pt-14">
+        <div className="w-full max-w-2xl">
+          <TaxCalculator onTaxCalculated={setUserTaxAmount} />
         </div>
-
-        {/* Government Spending Chart */}
-        {governmentSpendingData && (
-          <div className="mt-6 pt-4">
-            <GovernmentSpendingChart data={governmentSpendingData} />
-          </div>
-        )}
       </div>
+
+      {/* Government Spending Chart */}
+      {governmentSpendingData && (
+        <GovernmentSpendingChart
+          data={governmentSpendingData}
+          userTax={userTaxAmount}
+        />
+      )}
     </div>
   );
 }
