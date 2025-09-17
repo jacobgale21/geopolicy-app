@@ -109,6 +109,25 @@ class ApiService {
     const data: any = await response.json();
     return data;
   }
+  async getHealthData(
+    state: string,
+    name: string,
+    token: string
+  ): Promise<any> {
+    const url = `${this.baseUrl}/get_health_data/${state}/${name}`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to fetch health data");
+    }
+    const data: any = await response.json();
+    return data;
+  }
 }
 
 export const apiService = new ApiService(API_BASE_URL);
