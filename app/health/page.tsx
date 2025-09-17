@@ -30,8 +30,8 @@ const HEALTH_ISSUES = [
     color: "bg-yellow-500 hover:bg-yellow-600",
   },
   {
-    id: "Mental Health",
-    name: "Mental Health",
+    id: "Depression",
+    name: "Depression",
     color: "bg-indigo-500 hover:bg-indigo-600",
   },
   {

@@ -42,6 +42,43 @@ def get_health_data(state):
     response = requests.post(url, json={"query": query}, headers=headers)
     return response.json()["data"]["measures_A"][1]
 
+def get_depression_data(state):
+    url = "https://api.americashealthrankings.org/graphql"
+    query = f"""
+    query MeasuresSearch {{
+        measures_A(
+            where: {{ 
+                name: {{ contains: "Depression" }}
+            }}
+        ) {{
+            measureId
+            name
+            source {{ name }}
+            data(where: {{ 
+                state: {{ in: ["{state}"] }}
+                dateLabel: {{ in: ["2020", "2021", "2022", "2023", "2024"] }}
+            }}) {{
+                dateLabel
+                rank
+                state
+                value
+            }}
+        }}
+    }}
+    """
+    headers = {
+        "Content-Type": "application/json",
+        "X-Api-Key": f"{os.getenv('HEALTH_DATA_API_KEY')}"
+    }
+    response = requests.post(url, json={"query": query}, headers=headers)
+    return response.json()['data']['measures_A']
+
+def find_drug_data(data, name):
+    for item in data:
+        if item["name"] == name:
+            return item
+    return None
+
 def insert_health_data(conn, data, name):
     cur = conn.cursor()
         # Create table if not exists
@@ -79,13 +116,12 @@ def get_health_data_states(conn, state, name):
 #     states = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
            
 #     with connection_scope() as conn:
-#         # for state in states[]:
-#         #     data = get_health_data(state)
-#         #     insert_health_data(conn, data["data"], data["name"])
-#         # cur = conn.cursor()
-#         # cur.execute("SELECT * FROM HealthData")
-#         # print(cur.fetchall())
-#         # cur.close()
-#         print(get_health_data_states(conn, "FL", "Diabetes"))
+#         for state in states:
+#             data = find_drug_data(get_depression_data(state), "Depression")
+#             insert_health_data(conn, data["data"], data["name"])
+#         cur = conn.cursor()
+#         cur.execute("SELECT * FROM HealthData")
+#         print(cur.fetchall())
+#         cur.close()
 #         conn.close()
     

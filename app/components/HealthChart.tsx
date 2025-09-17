@@ -205,7 +205,7 @@ export default function HealthChart({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-green-50 p-4 rounded-lg">
               <p className="text-sm text-green-600 font-medium text-center">
-                Latest Value
+                {sortedData[sortedData.length - 1]?.year} Rate
               </p>
               <p className="text-2xl font-bold text-green-800 text-center">
                 {sortedData[sortedData.length - 1]?.value.toFixed(2)}%
