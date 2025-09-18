@@ -25,8 +25,8 @@ const HEALTH_ISSUES = [
   },
   { id: "Cancer", name: "Cancer", color: "bg-green-500 hover:bg-green-600" },
   {
-    id: "Obesity",
-    name: "Obesity",
+    id: "Suicide",
+    name: "Suicide",
     color: "bg-yellow-500 hover:bg-yellow-600",
   },
   {
@@ -35,8 +35,8 @@ const HEALTH_ISSUES = [
     color: "bg-indigo-500 hover:bg-indigo-600",
   },
   {
-    id: "Substance Abuse",
-    name: "Substance Abuse",
+    id: "Drug Deaths",
+    name: "Drug Deaths",
     color: "bg-orange-500 hover:bg-orange-600",
   },
   { id: "Smoking", name: "Smoking", color: "bg-gray-500 hover:bg-gray-600" },
@@ -234,53 +234,6 @@ export default function HealthPage() {
                 state={state}
                 healthIssue={selectedHealthIssue}
               />
-            </div>
-
-            {/* Data Table */}
-            <div className="bg-white border border-gray-200 rounded-lg shadow p-6">
-              <h3 className="text-2xl font-bold text-gray-900 mb-6">
-                {selectedHealthIssue} Statistics for {state}
-              </h3>
-
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Year
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Value
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        National Rank
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {healthData
-                      .sort((a, b) => b.year - a.year)
-                      .map((dataPoint, index) => (
-                        <tr
-                          key={index}
-                          className={
-                            index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                          }
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                            {dataPoint.year}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            {dataPoint.value.toFixed(2)}%
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                            #{dataPoint.rank}
-                          </td>
-                        </tr>
-                      ))}
-                  </tbody>
-                </table>
-              </div>
             </div>
           </>
         )}

@@ -42,13 +42,13 @@ def get_health_data(state):
     response = requests.post(url, json={"query": query}, headers=headers)
     return response.json()["data"]["measures_A"][1]
 
-def get_depression_data(state):
+def get_health_data(state, name):
     url = "https://api.americashealthrankings.org/graphql"
     query = f"""
     query MeasuresSearch {{
         measures_A(
             where: {{ 
-                name: {{ contains: "Depression" }}
+                name: {{ contains: "{name}" }}
             }}
         ) {{
             measureId
@@ -76,6 +76,12 @@ def get_depression_data(state):
 def find_drug_data(data, name):
     for item in data:
         if item["name"] == name:
+            return item
+    return None
+
+def find_measureid_data(data, measureid):
+    for item in data:
+        if item["measureId"] == measureid:
             return item
     return None
 
@@ -117,11 +123,12 @@ def get_health_data_states(conn, state, name):
            
 #     with connection_scope() as conn:
 #         for state in states:
-#             data = find_drug_data(get_depression_data(state), "Depression")
+#             data = find_drug_data(get_health_data(state, "Suicide"), "Suicide")
 #             insert_health_data(conn, data["data"], data["name"])
 #         cur = conn.cursor()
-#         cur.execute("SELECT * FROM HealthData")
+#         cur.execute("SELECT * FROM HealthData WHERE name = %s", ("Suicide",))
 #         print(cur.fetchall())
 #         cur.close()
 #         conn.close()
+    # print(find_drug_data(get_health_data("FL", "Suicide"), "Suicide"))
     

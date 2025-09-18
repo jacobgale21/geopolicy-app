@@ -48,6 +48,16 @@ export default function HealthChart({
   // Sort data by year for proper chart display
   const sortedData = [...data].sort((a, b) => a.year - b.year);
 
+  // Determine if this is a percentage-based health issue
+  const isPercentageBased =
+    healthIssue.toLowerCase().includes("diabetes") ||
+    healthIssue.toLowerCase().includes("depression");
+
+  const yAxisLabel = isPercentageBased ? "Percentage (%)" : "Rate per 100,000";
+  const chartTitle = isPercentageBased
+    ? "Percentage among Adults"
+    : "Rate per 100,000 Over Time";
+
   // Custom tooltip formatter
   const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
@@ -79,7 +89,7 @@ export default function HealthChart({
           {/* Percentage Over Time (Line) */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h4 className="text-lg font-semibold text-gray-800 text-center mb-4">
-              Percentage Over Time
+              {chartTitle}
             </h4>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
@@ -95,7 +105,7 @@ export default function HealthChart({
                   />
                   <YAxis
                     label={{
-                      value: "Percentage (%)",
+                      value: yAxisLabel,
                       angle: -90,
                       position: "outsideLeft",
                       offset: -10,
@@ -107,7 +117,10 @@ export default function HealthChart({
                   />
                   <Tooltip
                     labelFormatter={(value) => `Year: ${value}`}
-                    formatter={(value: number) => [`${value}%`, "Value"]}
+                    formatter={(value: number) => [
+                      isPercentageBased ? `${value}%` : value.toFixed(2),
+                      "Value",
+                    ]}
                     contentStyle={{
                       backgroundColor: "white",
                       border: "1px solid #e5e7eb",
@@ -125,7 +138,7 @@ export default function HealthChart({
                   <Line
                     type="monotone"
                     dataKey="value"
-                    name="Percentage"
+                    name={isPercentageBased ? "Percentage" : "Rate"}
                     stroke="#10B981"
                     strokeWidth={3}
                     dot={{ fill: "#10B981", strokeWidth: 2, r: 5 }}
@@ -136,79 +149,63 @@ export default function HealthChart({
             </div>
           </div>
 
-          {/* National Ranking Over Time (Bar) */}
-          <div className="bg-white rounded-lg shadow-lg p-6">
+          {/* Health Data Statistics Table */}
+          <div className="bg-white rounded-lg shadow-lg p-8">
             <h4 className="text-lg font-semibold text-gray-800 text-center mb-4">
-              National Ranking Over Time
+              Health Data by Year
             </h4>
-            <div className="h-80">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={sortedData}
-                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="year"
-                    tick={{ fontSize: 12 }}
-                    tickFormatter={(value) => value.toString()}
-                  />
-                  <YAxis
-                    label={{
-                      value: "Rank",
-                      angle: -90,
-                      position: "outsideLeft",
-                      offset: -10,
-                      dx: -15,
-                      style: { textAnchor: "middle" },
-                    }}
-                    width={50}
-                    tick={{ fontSize: 12 }}
-                    domain={["dataMin - 5", "dataMax + 5"]}
-                    reversed={true}
-                  />
-                  <Tooltip
-                    labelFormatter={(value) => `Year: ${value}`}
-                    formatter={(value: number) => [value, "Rank"]}
-                    contentStyle={{
-                      backgroundColor: "white",
-                      border: "1px solid #e5e7eb",
-                      borderRadius: "8px",
-                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                      fontWeight: "600",
-                    }}
-                    labelStyle={{
-                      fontWeight: "700",
-                      color: "#374151",
-                      fontSize: "14px",
-                    }}
-                  />
-                  <Legend />
-                  <Bar
-                    dataKey="rank"
-                    name="Rank"
-                    fill="#3b82f6"
-                    radius={[4, 4, 0, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+            <div className="h-80 overflow-y-auto">
+              <div className="space-y-3">
+                {sortedData.map((dataPoint, index) => (
+                  <div
+                    key={dataPoint.year}
+                    className={`p-4 rounded-lg border ${
+                      index === sortedData.length - 1
+                        ? "bg-blue-50 border-blue-200"
+                        : "bg-gray-50 border-gray-200"
+                    }`}
+                  >
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <h5 className="font-semibold text-gray-900">
+                          {dataPoint.year}
+                        </h5>
+                        <p className="text-sm text-gray-600">{healthIssue}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-lg font-bold text-gray-900">
+                          {isPercentageBased
+                            ? `${dataPoint.value.toFixed(2)}%`
+                            : dataPoint.value.toFixed(2)}
+                        </p>
+                        <p className="text-sm text-gray-600">
+                          National Rank: #{dataPoint.rank}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       <div className="bg-white rounded-lg p-6 shadow-lg mb-6">
-        <div className="mt-6">
-          <h4 className="text-xl font-semibold text-gray-800 mb-4 text-center">
+        <div className="mt-2">
+          <h4 className="text-xl font-semibold text-gray-800 mb-6 text-center">
             Summary Statistics
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="bg-green-50 p-4 rounded-lg">
               <p className="text-sm text-green-600 font-medium text-center">
-                {sortedData[sortedData.length - 1]?.year} Rate
+                {sortedData[sortedData.length - 1]?.year}{" "}
+                {isPercentageBased ? "Percentage" : "Rate"}
               </p>
               <p className="text-2xl font-bold text-green-800 text-center">
-                {sortedData[sortedData.length - 1]?.value.toFixed(2)}%
+                {isPercentageBased
+                  ? `${sortedData[sortedData.length - 1]?.value.toFixed(2)}%`
+                  : sortedData[sortedData.length - 1]?.value.toFixed(2)}
               </p>
             </div>
             <div className="bg-blue-50 p-4 rounded-lg">
@@ -229,7 +226,9 @@ export default function HealthChart({
             </div>
             <div className="bg-orange-50 p-4 rounded-lg">
               <p className="text-sm text-orange-600 font-medium text-center">
-                Trend
+                Trend over{" "}
+                {sortedData[sortedData.length - 1].year - sortedData[0].year}{" "}
+                years
               </p>
               <p className="text-2xl font-bold text-orange-800 text-center">
                 {sortedData.length > 1
@@ -237,8 +236,10 @@ export default function HealthChart({
                     sortedData[0].value
                     ? "↗ " +
                       (
-                        sortedData[sortedData.length - 1].value -
-                        sortedData[0].value
+                        ((sortedData[sortedData.length - 1].value -
+                          sortedData[0].value) /
+                          sortedData[0].value) *
+                        100
                       ).toFixed(2) +
                       "%"
                     : "↘ " +
