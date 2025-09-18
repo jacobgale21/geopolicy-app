@@ -51,7 +51,8 @@ export default function HealthChart({
   // Determine if this is a percentage-based health issue
   const isPercentageBased =
     healthIssue.toLowerCase().includes("diabetes") ||
-    healthIssue.toLowerCase().includes("depression");
+    healthIssue.toLowerCase().includes("depression") ||
+    healthIssue.toLowerCase().includes("heart diseases");
 
   const yAxisLabel = isPercentageBased ? "Percentage (%)" : "Rate per 100,000";
   const chartTitle = isPercentageBased
@@ -232,22 +233,25 @@ export default function HealthChart({
               </p>
               <p className="text-2xl font-bold text-orange-800 text-center">
                 {sortedData.length > 1
-                  ? sortedData[sortedData.length - 1].value >
-                    sortedData[0].value
-                    ? "↗ " +
-                      (
-                        ((sortedData[sortedData.length - 1].value -
-                          sortedData[0].value) /
-                          sortedData[0].value) *
-                        100
-                      ).toFixed(2) +
-                      "%"
-                    : "↘ " +
-                      (
-                        sortedData[0].value -
-                        sortedData[sortedData.length - 1].value
-                      ).toFixed(2) +
-                      "%"
+                  ? (() => {
+                      const firstValue = sortedData[0].value;
+                      const lastValue = sortedData[sortedData.length - 1].value;
+                      const difference = lastValue - firstValue;
+
+                      if (isPercentageBased) {
+                        // For percentage-based: just subtract the values
+                        return difference > 0
+                          ? `↗ ${difference.toFixed(2)}%`
+                          : `↘ ${difference.toFixed(2)}%`;
+                      } else {
+                        // For rate-based: subtract, divide by first value, multiply by 100
+                        const percentageChange =
+                          (difference / firstValue) * 100;
+                        return percentageChange > 0
+                          ? `↗ ${percentageChange.toFixed(2)}%`
+                          : `↘ ${percentageChange.toFixed(2)}%`;
+                      }
+                    })()
                   : "➡"}
               </p>
             </div>

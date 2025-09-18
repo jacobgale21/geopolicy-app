@@ -19,8 +19,8 @@ const HEALTH_ISSUES = [
   { id: "Diabetes", name: "Diabetes", color: "bg-red-500 hover:bg-red-600" },
   { id: "AIDS", name: "HIV/AIDS", color: "bg-purple-500 hover:bg-purple-600" },
   {
-    id: "Heart Disease",
-    name: "Heart Disease",
+    id: "Heart Diseases",
+    name: "Heart Diseases",
     color: "bg-blue-500 hover:bg-blue-600",
   },
   { id: "Cancer", name: "Cancer", color: "bg-green-500 hover:bg-green-600" },

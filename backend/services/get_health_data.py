@@ -73,7 +73,7 @@ def get_health_data(state, name):
     response = requests.post(url, json={"query": query}, headers=headers)
     return response.json()['data']['measures_A']
 
-def find_drug_data(data, name):
+def find_health_data(data, name):
     for item in data:
         if item["name"] == name:
             return item
@@ -118,17 +118,17 @@ def get_health_data_states(conn, state, name):
         cur.close()
         return result
 
-# if __name__ == "__main__":
-#     states = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
+if __name__ == "__main__":
+    states = ["AL", "AK", "AZ", "AR", "CA", "CO", "CT", "DE", "FL", "GA", "HI", "ID", "IL", "IN", "IA", "KS", "KY", "LA", "ME", "MD", "MA", "MI", "MN", "MS", "MO", "MT", "NE", "NV", "NH", "NJ", "NM", "NY", "NC", "ND", "OH", "OK", "OR", "PA", "RI", "SC", "SD", "TN", "TX", "UT", "VT", "VA", "WA", "WV", "WI", "WY"]
            
-#     with connection_scope() as conn:
-#         for state in states:
-#             data = find_drug_data(get_health_data(state, "Suicide"), "Suicide")
-#             insert_health_data(conn, data["data"], data["name"])
-#         cur = conn.cursor()
-#         cur.execute("SELECT * FROM HealthData WHERE name = %s", ("Suicide",))
-#         print(cur.fetchall())
-#         cur.close()
-#         conn.close()
-    # print(find_drug_data(get_health_data("FL", "Suicide"), "Suicide"))
+    with connection_scope() as conn:
+        # for state in states:
+        #     data = find_health_data(get_health_data(state, "Cardiovascular Diseases"), "Cardiovascular Diseases")
+        #     insert_health_data(conn, data["data"], "Heart Diseases")
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM HealthData WHERE name = %s", ("Heart Diseases",))
+        print(cur.fetchall())
+        cur.close()
+        conn.close()
+    # print(find_health_data(get_health_data("FL", "Cardiovascular Diseases"), "Cardiovascular Diseases"))
     

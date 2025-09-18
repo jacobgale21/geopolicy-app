@@ -5,6 +5,7 @@ import awsExports from "../../src/aws-exports";
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 
+Amplify.configure(awsExports);
 const components = {
   Header() {
     return (

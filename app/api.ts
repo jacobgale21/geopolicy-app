@@ -128,6 +128,21 @@ class ApiService {
     const data: any = await response.json();
     return data;
   }
+  async getRecentLegislation(token: string): Promise<any> {
+    const url = `${this.baseUrl}/get_recent_legislation`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to fetch recent legislation");
+    }
+    const data: any = await response.json();
+    return data;
+  }
 }
 
 export const apiService = new ApiService(API_BASE_URL);

@@ -24,19 +24,6 @@ async function getTokens() {
   }
 }
 
-interface CrimeDataPoint {
-  year: string;
-  crime_counts: number;
-}
-
-interface CensusDataPoint {
-  year: number;
-  poverty_rate: number;
-  educational: number;
-  income_mean: number;
-  income_median: number;
-}
-
 interface SpendingData {
   name: string;
   amount: number;
@@ -46,10 +33,6 @@ interface SpendingData {
 interface GovernmentSpendingData {
   agency_data: SpendingData[];
   budget_functions_data: SpendingData[];
-}
-
-interface GovernmentSpendingChartProps {
-  data: GovernmentSpendingData;
 }
 
 export default function Home() {
