@@ -23,8 +23,8 @@ def get_state_murder_counts(state, full_state, start_year, end_year):
         year_total[int(key[3:])] += value
     return year_total
 
-def get_state_assault_counts(state, full_state, start_year, end_year):
-    url = f"https://api.usa.gov/crime/fbi/cde/summarized/state/{state}/ASS?from=01-{start_year}&to=12-{end_year}&API_KEY={os.getenv('FBI_API_KEY')}"
+def get_state_crime_rates(state, full_state, start_year, end_year, crime_type):
+    url = f"https://api.usa.gov/crime/fbi/cde/summarized/state/{state}/{crime_type}?from=01-{start_year}&to=12-{end_year}&API_KEY={os.getenv('FBI_API_KEY')}"
     response = requests.get(url)
     data = response.json()
     temp = data['offenses']['rates'][full_state]
@@ -33,9 +33,9 @@ def get_state_assault_counts(state, full_state, start_year, end_year):
         year_total[int(key[3:])] += round(float(value)/12.0, 2)
     return year_total
 
-def get_us_assault_counts(start_year, end_year):
+def get_us_crime_rates(start_year, end_year, crime_type):
     # Can get any state and pull national assault counts from api request
-    url = f"https://api.usa.gov/crime/fbi/cde/summarized/state/FL/ASS?from=01-{start_year}&to=12-{end_year}&API_KEY={os.getenv('FBI_API_KEY')}"
+    url = f"https://api.usa.gov/crime/fbi/cde/summarized/state/FL/{crime_type}?from=01-{start_year}&to=12-{end_year}&API_KEY={os.getenv('FBI_API_KEY')}"
     response = requests.get(url)
     data = response.json()
     temp = data['offenses']['rates']['United States']
@@ -136,24 +136,16 @@ def main():
             'WI': 'Wisconsin',
             'WY': 'Wyoming',
         }
-        # with connection_scope() as conn:
+        with connection_scope() as conn:
             # for key, value in states.items():
-            # state = key
-            # full_state = value
-            # crime_type = 'Assault'
-            # full_state = 'United States'
-            # homicide_counts = get_us_assault_counts(2021, 2024)
-            # insert_crime_data(conn, full_state, homicide_counts, crime_type)
-            # cur = conn.cursor()
-            # cur.execute('SELECT * FROM CrimeData WHERE crime_type = %s and state = %s', ('Assault', 'United States'))
-            # print(cur.fetchall())
-            # cur.close()
-
-            # cur = conn.cursor()
-            # cur.execute('DROP TABLE IF EXISTS CrimeData')
-            # conn.commit()
-            # cur.close()
-            
+            #     state = key
+            #     full_state = value
+            #     homicide_counts = get_state_crime_rates(state, full_state, 2021, 2024, crime_type)
+            #     insert_crime_data(conn, full_state, homicide_counts, crime_type)
+            # print(get_crime_data(conn, 'United States', 'BUR'))
+            # us_crime_rates = get_us_crime_rates(2021, 2024, 'BUR')
+            # insert_crime_data(conn, 'United States', us_crime_rates, 'BUR')
+                        
            
     except Error as error:
         print(error)

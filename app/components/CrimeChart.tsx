@@ -25,6 +25,7 @@ interface CrimeChartProps {
   // Optional multi-series props for tabs
   homicideData?: CrimeDataPoint[];
   assaultData?: CrimeDataPoint[];
+  burglaryData?: CrimeDataPoint[];
 }
 
 export default function CrimeChart({
@@ -33,6 +34,7 @@ export default function CrimeChart({
   crimeType,
   homicideData,
   assaultData,
+  burglaryData,
 }: CrimeChartProps) {
   if (!data || data.length === 0) {
     return (
@@ -51,11 +53,13 @@ export default function CrimeChart({
       entries.push({ type: "Homicide", data: homicideData });
     if (assaultData && assaultData.length > 0)
       entries.push({ type: "Assault", data: assaultData });
+    if (burglaryData && burglaryData.length > 0)
+      entries.push({ type: "Burglary", data: burglaryData });
     // Fallback to single provided data
     if (entries.length === 0 && data && data.length > 0)
       entries.push({ type: crimeType, data });
     return entries;
-  }, [homicideData, assaultData, data, crimeType]);
+  }, [homicideData, assaultData, burglaryData, data, crimeType]);
 
   const [selectedType, setSelectedType] = useState<string>(
     availableDatasets[0]?.type || crimeType
@@ -72,10 +76,13 @@ export default function CrimeChart({
   const chartData = current.map((item) => {
     const yearKey = String(item.year);
     const nationalAssault = (usData as Record<string, any>)[yearKey]?.assault;
+    const nationalBurglary = (usData as Record<string, any>)[yearKey]?.burglary;
     return {
       year: item.year,
       count: item.crime_counts,
       us_assault: typeof nationalAssault === "number" ? nationalAssault : null,
+      us_burglary:
+        typeof nationalBurglary === "number" ? nationalBurglary : null,
     };
   });
 
@@ -192,6 +199,17 @@ export default function CrimeChart({
                   type="monotone"
                   dataKey="us_assault"
                   name="US Assault Rate"
+                  stroke="#9ca3af"
+                  strokeWidth={2}
+                  strokeDasharray="5 5"
+                  dot={false}
+                />
+              )}
+              {selectedType.toLowerCase() === "burglary" && (
+                <Line
+                  type="monotone"
+                  dataKey="us_burglary"
+                  name="US Burglary Rate"
                   stroke="#9ca3af"
                   strokeWidth={2}
                   strokeDasharray="5 5"

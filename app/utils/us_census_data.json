@@ -5,7 +5,8 @@
     "income_mean": 97962.0,
     "income_median": 69717.0,
     "cpi_yoy": 4.69,
-    "assault": 21.59
+    "assault": 21.59,
+    "burglary": 22.18
   },
   "2022": {
     "poverty_rate": 8.9,
@@ -13,7 +14,8 @@
     "income_mean": 105555.0,
     "income_median": 74755.0,
     "cpi_yoy": 8.01,
-    "assault": 23.18
+    "assault": 23.18,
+    "burglary": 22.97
   },
   "2023": {
     "poverty_rate": 8.8,
@@ -21,9 +23,11 @@
     "income_mean": 109160.0,
     "income_median": 77719.0,
     "cpi_yoy": 4.14,
-    "assault": 22.53
+    "assault": 22.53,
+    "burglary": 21.14
   },
   "2024": {
-    "assault": 21.49
+    "assault": 21.49,
+    "burglary": 19.35
   }
 }

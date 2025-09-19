@@ -70,7 +70,7 @@ const STATES = [
 export default function LawEnforcementPage() {
   const [homicideData, setHomicideData] = useState<CrimeDataPoint[]>([]);
   const [assaultData, setAssaultData] = useState<CrimeDataPoint[]>([]);
-
+  const [burglaryData, setBurglaryData] = useState<CrimeDataPoint[]>([]);
   const { state, setState } = useAddress();
   useEffect(() => {
     (async () => {
@@ -103,8 +103,18 @@ export default function LawEnforcementPage() {
                   year: item[4],
                   crime_counts: item[3],
                 }));
+              const newBurglaryData = crimeDataResponse
+                .filter(
+                  (item: [number, string, string, number, number]) =>
+                    item[2].toLowerCase() === "burglary"
+                )
+                .map((item: [number, string, string, number, number]) => ({
+                  year: item[4],
+                  crime_counts: item[3],
+                }));
               setHomicideData(newHomicideData);
               setAssaultData(newAssaultData);
+              setBurglaryData(newBurglaryData);
             }
           } catch (error) {
             console.error("Failed to fetch state crime data:", error);
@@ -158,6 +168,7 @@ export default function LawEnforcementPage() {
               state={state}
               homicideData={homicideData}
               assaultData={assaultData}
+              burglaryData={burglaryData}
               crimeType="Homicide"
             />
           </div>

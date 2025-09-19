@@ -40,7 +40,7 @@ export default function Home() {
   const [selectedState, setSelectedState] = useState<string>("");
   const [findReps, setFindReps] = useState<boolean>(false);
   const { address, setAddress, setState } = useAddress();
-
+  const [loading, setLoading] = useState<boolean>(false);
   // Seed US averages cache once the user is authenticated and page renders on client
   // Authenticator wraps this page, so render implies signed in; additionally guard with getCurrentUser
   useEffect(() => {
@@ -55,6 +55,7 @@ export default function Home() {
   }, []);
   const getLegislators = async (address: string) => {
     try {
+      setLoading(true);
       const token = await getTokens();
       if (!token) {
         console.error("No token available");
@@ -67,6 +68,7 @@ export default function Home() {
     } catch (error) {
       console.error("Error fetching legislators:", error);
     }
+    setLoading(false);
   };
 
   const handleFindReps = async () => {
@@ -130,14 +132,18 @@ export default function Home() {
 
             <button
               className="bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!address}
+              disabled={!address || loading}
               onClick={handleFindReps}
             >
               Find My Representatives
             </button>
 
             {/* Display Legislators */}
-
+            {loading && (
+              <div className="mt-8 border-t pt-6">
+                <p className="text-gray-600 text-center">Loading...</p>
+              </div>
+            )}
             {legislators.length > 0 && (
               <div className="mt-8 border-t pt-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">
@@ -202,7 +208,7 @@ export default function Home() {
               </div>
             )}
 
-            {legislators.length === 0 && findReps && (
+            {!loading && legislators.length === 0 && findReps && (
               <div className="mt-8 border-t pt-6">
                 <p className="text-gray-600 text-center">
                   No senators found for {selectedState}. Please try another
