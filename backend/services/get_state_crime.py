@@ -136,7 +136,7 @@ def main():
             'WI': 'Wisconsin',
             'WY': 'Wyoming',
         }
-        with connection_scope() as conn:
+        # with connection_scope() as conn:
             # for key, value in states.items():
             #     state = key
             #     full_state = value

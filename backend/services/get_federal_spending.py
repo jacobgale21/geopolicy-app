@@ -95,6 +95,33 @@ def get_budget_functions(conn):
     cur.execute("SELECT * FROM federal_budget_functions ORDER BY percent_budget DESC")
     return cur.fetchall()
 
+def fetch_federal_economic_data():
+    data = pd.read_csv('../data/economic_data.csv')
+    data = data.filter(items=['date', 'pce_price_index', 'gdp', 'wages_and_salaries'])
+    data = data[data['date'] >= 2020]
+    data = data[data['date'] <= 2030]
+    data = data.set_index('date')
+    data = data.sort_index()
+    
+    # Convert to list of dictionaries to avoid numpy data types in JSON
+    return data.reset_index().to_dict('records')
+
+def insert_federal_economic_data(conn, economic_data):
+    try:
+        cur = conn.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS federal_economic_data(date INT PRIMARY KEY, pce_price_index FLOAT, gdp FLOAT, wages_and_salaries FLOAT)")
+        for row in economic_data:
+            cur.execute("INSERT INTO federal_economic_data (date, pce_price_index, gdp, wages_and_salaries) VALUES (%s, %s, %s, %s)", (row["date"], row["pce_price_index"], row["gdp"], row["wages_and_salaries"]))
+        conn.commit()
+    except Error as error:
+        print("Error with inserting federal economic data", error)
+    finally:
+        cur.close()
+
+def get_federal_economic_data(conn):
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM federal_economic_data")
+    return cur.fetchall()
 # def main():
     # with connection_scope() as conn:
     #     # budget_functions_df = get_federal_budget_functions()
@@ -105,4 +132,7 @@ def get_budget_functions(conn):
     #     print(get_budget_functions(conn))
 
 # if __name__ == "__main__":
-#     main()
+#     with connection_scope() as conn:
+        # economic_data = get_federal_economic_data()
+        # insert_federal_economic_data(conn, economic_data)
+        

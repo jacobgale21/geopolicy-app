@@ -1,6 +1,7 @@
 import requests
 from fastapi import APIRouter, Depends
-from services.get_state_crime import get_crime_data as service_get_crime_data, get_all_state_crime as service_get_all_state_crime
+from services.get_state_crime import get_crime_data as service_get_crime_data
+from services.get_state_crime import get_all_state_crime as service_get_all_state_crime
 from db import connection_scope
 from auth import verify_token
 from helper import translate_state

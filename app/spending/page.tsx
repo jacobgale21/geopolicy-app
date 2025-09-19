@@ -1,6 +1,7 @@
 "use client";
 import TaxCalculator from "../components/TaxCalculator";
 import GovernmentSpendingChart from "../components/GovernmentSpendingChart";
+import FederalEconomicChart from "../components/FederalEconomicChart";
 import { useState } from "react";
 import { getCurrentUser } from "aws-amplify/auth";
 import { seedUsAveragesCache } from "../utils/usCensusCache";
@@ -19,6 +20,13 @@ interface GovernmentSpendingData {
   budget_functions_data: SpendingData[];
 }
 
+interface EconomicDataPoint {
+  date: number;
+  pce_price_index: number;
+  gdp: number;
+  wages_and_salaries: number;
+}
+
 export default function SpendingPage() {
   const [governmentSpendingData, setGovernmentSpendingData] =
     useState<GovernmentSpendingData | null>(null);
@@ -27,6 +35,7 @@ export default function SpendingPage() {
   >([]);
   const [agencyData, setAgencyData] = useState<SpendingData[]>([]);
   const [userTaxAmount, setUserTaxAmount] = useState<number>(0);
+  const [economicData, setEconomicData] = useState<EconomicDataPoint[]>([]);
   useEffect(() => {
     (async () => {
       try {
@@ -64,7 +73,24 @@ export default function SpendingPage() {
               budget_functions_data: budgetFunctions,
             };
             setGovernmentSpendingData(governmentSpending);
-            console.log(governmentSpending);
+
+            // Fetch federal economic data
+
+            const economicDataResponse =
+              await apiService.getFederalEconomicData(token);
+            console.log("Economic data:", economicDataResponse);
+            if (economicDataResponse.economic_data) {
+              const federalEconomicData =
+                economicDataResponse.economic_data.map(
+                  (item: [number, number, number, number]) => ({
+                    date: item[0],
+                    pce_price_index: item[1],
+                    gdp: item[2],
+                    wages_and_salaries: item[3],
+                  })
+                );
+              setEconomicData(federalEconomicData);
+            }
           } catch (error) {
             console.error("Failed to fetch government spending data:", error);
           }
@@ -90,6 +116,16 @@ export default function SpendingPage() {
           userTax={userTaxAmount}
         />
       )}
+
+      {/* Federal Economic Data Chart */}
+
+      <div className="flex items-center justify-center p-4 pt-14">
+        <div className="w-full max-w-2xl">
+          {economicData.length > 0 && (
+            <FederalEconomicChart data={economicData} />
+          )}
+        </div>
+      </div>
     </div>
   );
 }

@@ -101,7 +101,7 @@ export default function LawEnforcementPage() {
                 )
                 .map((item: [number, string, string, number, number]) => ({
                   year: item[4],
-                  crime_counts: item[3],
+                  crime_counts: item[3].toFixed(2),
                 }));
               const newBurglaryData = crimeDataResponse
                 .filter(
@@ -110,7 +110,7 @@ export default function LawEnforcementPage() {
                 )
                 .map((item: [number, string, string, number, number]) => ({
                   year: item[4],
-                  crime_counts: item[3],
+                  crime_counts: item[3].toFixed(2),
                 }));
               setHomicideData(newHomicideData);
               setAssaultData(newAssaultData);
