@@ -58,8 +58,16 @@ export default function FederalEconomicChart({
     ...item,
     date: item.date.toString(),
     gdp: item.gdp / 1000, // Convert to trillions
-    wages_and_salaries: item.wages_and_salaries, // Convert to billions
+    wages_and_salaries: item.wages_and_salaries,
+    inflation: 0,
   }));
+
+  for (let i = 1; i < chartData.length; i++) {
+    chartData[i].inflation =
+      ((chartData[i].pce_price_index - chartData[i - 1].pce_price_index) /
+        chartData[i - 1].pce_price_index) *
+      100;
+  }
 
   return (
     <section className="relative w-full bg-white rounded-lg shadow-lg p-6 mx-6 mb-8">
@@ -298,6 +306,79 @@ export default function FederalEconomicChart({
             </ResponsiveContainer>
           </div>
         </div>
+
+        {/* Inflation Chart */}
+        <div className="bg-red-50 p-6 rounded-lg">
+          <h3 className="font-semibold text-red-900 mb-4 text-center text-lg">
+            Yearly Inflation Rate (%)
+          </h3>
+          <div className="h-[400px] w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={chartData.slice(1)}
+                margin={{
+                  top: 10,
+                  right: 10,
+                  left: 10,
+                  bottom: 10,
+                }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+                <XAxis
+                  dataKey="date"
+                  stroke="#6b7280"
+                  fontSize={10}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  stroke="#6b7280"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => `${formatNumber(value)}%`}
+                  domain={[0, "dataMax + 1"]}
+                  label={{
+                    value: "Inflation Rate (%)",
+                    angle: -90,
+                    position: "insideLeft",
+                    style: {
+                      textAnchor: "middle",
+                      fontSize: "12px",
+                      fill: "#6b7280",
+                    },
+                    dx: -10,
+                  }}
+                />
+                <Tooltip
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-white p-2 border border-gray-200 rounded shadow-lg text-xs">
+                          <p className="font-semibold text-gray-900">
+                            Year: {label}
+                          </p>
+                          <p style={{ color: payload[0].color }}>
+                            Inflation Rate: {payload[0].value?.toFixed(2)}%
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="inflation"
+                  stroke="#dc2626"
+                  strokeWidth={2}
+                  dot={{ fill: "#dc2626", strokeWidth: 1, r: 3 }}
+                  activeDot={{ r: 4, stroke: "#dc2626", strokeWidth: 2 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
       </motion.div>
 
       {/* Description */}
@@ -334,6 +415,15 @@ export default function FederalEconomicChart({
             <p className="text-yellow-700 text-sm">
               A measure of inflation based on the prices of goods and services
               consumed by households.
+            </p>
+          </div>
+          <div className="bg-red-50 p-4 rounded-lg">
+            <h3 className="font-semibold text-red-900 mb-2">
+              Yearly Inflation Rate
+            </h3>
+            <p className="text-red-700 text-sm">
+              The year-over-year percentage change in the PCE Price Index,
+              showing the rate of inflation from one year to the next.
             </p>
           </div>
         </div>

@@ -122,17 +122,49 @@ def get_federal_economic_data(conn):
     cur = conn.cursor()
     cur.execute("SELECT * FROM federal_economic_data")
     return cur.fetchall()
-# def main():
-    # with connection_scope() as conn:
-    #     # budget_functions_df = get_federal_budget_functions()
-    #     # agency_df = get_federal_spending_agencies()
-    #     # insert_federal_budget_functions(conn, budget_functions_df)
-    #     # insert_agency_data(conn, agency_df)
-    #     print(get_agency_data(conn))
-    #     print(get_budget_functions(conn))
 
-# if __name__ == "__main__":
+def fetch_federal_debt():
+    url = "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v2/accounting/od/debt_outstanding"
+    filters = "?fields=debt_outstanding_amt,record_fiscal_year,record_fiscal_quarter,record_date&filter=record_date:gte:2020-01-01"
+    response = requests.get(url+filters)
+    return response.json()['data']
+
+def get_treasury_statements():
+    url = "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/mts/mts_table_1"
+    filters = "?fields=record_date,current_month_gross_rcpt_amt,current_month_gross_outly_amt,current_month_dfct_sur_amt&filter=record_date:gte:2020-01-01"
+    response = requests.get(url+filters)
+    return response.json()['data']
+
+def insert_federal_debt(conn, federal_debt):
+    try:
+        cur = conn.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS federal_debt(date INT PRIMARY KEY, debt_outstanding_amt FLOAT)")
+        for row in federal_debt:
+            cur.execute("INSERT INTO federal_debt (date, debt_outstanding_amt) VALUES (%s, %s)", (int(row["record_fiscal_year"]), row["debt_outstanding_amt"]))
+        conn.commit()
+    except Error as error:
+        print("Error with inserting federal debt", error)
+    finally:
+        cur.close()
+def get_federal_debt(conn):
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM federal_debt")
+        result = cur.fetchall()
+    except Error as error:
+        print("Error with getting federal debt", error)
+    finally:
+        cur.close()
+        return result
+# def main():
 #     with connection_scope() as conn:
-        # economic_data = get_federal_economic_data()
-        # insert_federal_economic_data(conn, economic_data)
+#        insert_federal_debt(conn, get_federal_debt())
+#        cur = conn.cursor()
+#        cur.execute("SELECT * FROM federal_debt")
+#        print(cur.fetchall())
+#        cur.close()
+    
+
+if __name__ == "__main__":
+    print(get_treasury_statements())
         

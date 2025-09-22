@@ -2,6 +2,7 @@
 import TaxCalculator from "../components/TaxCalculator";
 import GovernmentSpendingChart from "../components/GovernmentSpendingChart";
 import FederalEconomicChart from "../components/FederalEconomicChart";
+import FederalDebtAndTreasuryChart from "../components/FederalDebtAndTreasuryChart";
 import { useState } from "react";
 import { getCurrentUser } from "aws-amplify/auth";
 import { seedUsAveragesCache } from "../utils/usCensusCache";
@@ -27,6 +28,18 @@ interface EconomicDataPoint {
   wages_and_salaries: number;
 }
 
+interface DebtDataPoint {
+  year: number;
+  debt: number;
+}
+
+interface TreasuryStatement {
+  record_date: string;
+  current_month_gross_rcpt_amt: number;
+  current_month_gross_outly_amt: number;
+  current_month_dfct_sur_amt: number;
+}
+
 export default function SpendingPage() {
   const [governmentSpendingData, setGovernmentSpendingData] =
     useState<GovernmentSpendingData | null>(null);
@@ -36,6 +49,10 @@ export default function SpendingPage() {
   const [agencyData, setAgencyData] = useState<SpendingData[]>([]);
   const [userTaxAmount, setUserTaxAmount] = useState<number>(0);
   const [economicData, setEconomicData] = useState<EconomicDataPoint[]>([]);
+  const [federalDebt, setFederalDebt] = useState<DebtDataPoint[]>([]);
+  const [treasuryStatements, setTreasuryStatements] = useState<
+    TreasuryStatement[]
+  >([]);
   useEffect(() => {
     (async () => {
       try {
@@ -75,7 +92,6 @@ export default function SpendingPage() {
             setGovernmentSpendingData(governmentSpending);
 
             // Fetch federal economic data
-
             const economicDataResponse =
               await apiService.getFederalEconomicData(token);
             console.log("Economic data:", economicDataResponse);
@@ -90,6 +106,45 @@ export default function SpendingPage() {
                   })
                 );
               setEconomicData(federalEconomicData);
+            }
+
+            // Fetch federal debt and treasury statements data
+            try {
+              const debtDataResponse = await apiService.getFederalDebt(token);
+              console.log("Debt data:", debtDataResponse);
+
+              if (debtDataResponse.federal_debt) {
+                const debtData = debtDataResponse.federal_debt.map(
+                  (item: [number, number]) => ({
+                    year: item[0],
+                    debt: item[1],
+                  })
+                );
+                setFederalDebt(debtData);
+              }
+
+              if (debtDataResponse.treasury_statements) {
+                const treasuryData = debtDataResponse.treasury_statements.map(
+                  (item: {
+                    record_date: string;
+                    current_month_gross_rcpt_amt: number;
+                    current_month_gross_outly_amt: number;
+                    current_month_dfct_sur_amt: number;
+                  }) => ({
+                    record_date: item["record_date"],
+                    current_month_gross_rcpt_amt:
+                      item["current_month_gross_rcpt_amt"],
+                    current_month_gross_outly_amt:
+                      item["current_month_gross_outly_amt"],
+                    current_month_dfct_sur_amt:
+                      item["current_month_dfct_sur_amt"],
+                  })
+                );
+                console.log("Treasury data:", treasuryData);
+                setTreasuryStatements(treasuryData);
+              }
+            } catch (error) {
+              console.error("Failed to fetch debt and treasury data:", error);
             }
           } catch (error) {
             console.error("Failed to fetch government spending data:", error);
@@ -118,11 +173,22 @@ export default function SpendingPage() {
       )}
 
       {/* Federal Economic Data Chart */}
-
       <div className="flex items-center justify-center p-4 pt-14">
-        <div className="w-full max-w-2xl">
+        <div className="w-full max-w-4xl">
           {economicData.length > 0 && (
             <FederalEconomicChart data={economicData} />
+          )}
+        </div>
+      </div>
+
+      {/* Federal Debt & Treasury Statements Charts */}
+      <div className="flex items-center justify-center p-4 pt-16">
+        <div className="w-full max-w-4xl">
+          {(federalDebt.length > 0 || treasuryStatements.length > 0) && (
+            <FederalDebtAndTreasuryChart
+              federalDebt={federalDebt}
+              treasuryStatements={treasuryStatements}
+            />
           )}
         </div>
       </div>
