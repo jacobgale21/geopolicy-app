@@ -27,8 +27,8 @@ const formatCurrency = (value: number) => {
   return new Intl.NumberFormat("en-US", {
     style: "currency",
     currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
   }).format(value);
 };
 
@@ -84,8 +84,15 @@ export default function FederalEconomicChart({
       ((lastPastYear - firstPastYear) / firstPastYear) * 100;
     const totalFuturePercentageIncrease =
       ((lastFutureYear - lastPastYear) / lastPastYear) * 100;
-    const totalPastInflation = lastPastInflation - firstPastInflation;
-    const totalFutureInflation = lastFutureInflation - lastPastInflation;
+    // Calculate average inflation from 2025 to last element
+    const futureInflationData = chartData.filter((item) => item.date >= 2025);
+    const averageAnnualFutureInflation =
+      futureInflationData.length > 0
+        ? futureInflationData.reduce((sum, item) => sum + item.inflation, 0) /
+          futureInflationData.length
+        : 0;
+    const averageAnnualPastInflation =
+      (lastPastInflation - firstPastInflation) / (2025 - chartData[0].date);
     return {
       totalPastIncrease: totalPastPercentageIncrease,
       averageAnnualIncrease:
@@ -94,8 +101,8 @@ export default function FederalEconomicChart({
       averageAnnualFutureIncrease:
         totalFuturePercentageIncrease /
         (chartData[chartData.length - 1].date - 2025),
-      totalPastInflation: totalPastInflation,
-      totalFutureInflation: totalFutureInflation,
+      averageAnnualFutureInflation: averageAnnualFutureInflation,
+      averageAnnualPastInflation: averageAnnualPastInflation,
     };
   };
 
@@ -178,7 +185,7 @@ export default function FederalEconomicChart({
                             Year: {label}
                           </p>
                           <p style={{ color: payload[0].color }}>
-                            GDP: {formatCurrency(payload[0].value)}
+                            GDP: {formatCurrency(payload[0].value)}T
                           </p>
                         </div>
                       );
@@ -511,10 +518,10 @@ export default function FederalEconomicChart({
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
                 <div className="bg-white p-4 rounded-lg shadow-sm">
                   <div className="text-2xl font-bold text-red-700">
-                    {gdpSummary.totalPastInflation?.toFixed(1)}%
+                    {gdpSummary.averageAnnualPastInflation?.toFixed(1)}%
                   </div>
                   <div className="text-sm text-gray-600">
-                    Average Annual Past Inflation
+                    Average Annual Change in Inflation
                   </div>
                   <div className="text-xs text-gray-500 mt-1">
                     Per year ({chartData[0].date} - 2025)
@@ -522,7 +529,7 @@ export default function FederalEconomicChart({
                 </div>
                 <div className="bg-white p-4 rounded-lg shadow-sm">
                   <div className="text-2xl font-bold text-red-700">
-                    {gdpSummary.totalFutureInflation?.toFixed(1)}%
+                    {gdpSummary.averageAnnualFutureInflation?.toFixed(1)}%
                   </div>
                   <div className="text-sm text-gray-600">
                     Average Annual Future Inflation

@@ -24,7 +24,7 @@ async def get_federal_economic_data_endpoint(token: str = Depends(verify_token))
 async def get_federal_debt_endpoint(token: str = Depends(verify_token)):
     with connection_scope() as conn:
         federal_debt = get_federal_debt(conn)
-        treasury_statements = get_treasury_statements()
+        treasury_statements = get_treasury_statements(conn)
         return {"federal_debt": federal_debt, "treasury_statements": treasury_statements}
 
 __all__ = ["app"]

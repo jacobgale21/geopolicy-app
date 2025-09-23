@@ -34,7 +34,7 @@ interface DebtDataPoint {
 }
 
 interface TreasuryStatement {
-  record_date: string;
+  record_date: Date;
   current_month_gross_rcpt_amt: number;
   current_month_gross_outly_amt: number;
   current_month_dfct_sur_amt: number;
@@ -124,23 +124,16 @@ export default function SpendingPage() {
               }
 
               if (debtDataResponse.treasury_statements) {
+                console.log(debtDataResponse.treasury_statements);
                 const treasuryData = debtDataResponse.treasury_statements.map(
-                  (item: {
-                    record_date: string;
-                    current_month_gross_rcpt_amt: number;
-                    current_month_gross_outly_amt: number;
-                    current_month_dfct_sur_amt: number;
-                  }) => ({
-                    record_date: item["record_date"],
-                    current_month_gross_rcpt_amt:
-                      item["current_month_gross_rcpt_amt"],
-                    current_month_gross_outly_amt:
-                      item["current_month_gross_outly_amt"],
-                    current_month_dfct_sur_amt:
-                      item["current_month_dfct_sur_amt"],
+                  (item: [Date, number, number, number]) => ({
+                    record_date: item[0],
+                    current_month_gross_rcpt_amt: item[1],
+                    current_month_gross_outly_amt: item[2],
+                    current_month_dfct_sur_amt: item[3],
                   })
                 );
-                console.log("Treasury data:", treasuryData);
+                console.log(treasuryData);
                 setTreasuryStatements(treasuryData);
               }
             } catch (error) {

@@ -129,11 +129,55 @@ def fetch_federal_debt():
     response = requests.get(url+filters)
     return response.json()['data']
 
-def get_treasury_statements():
-    url = "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/mts/mts_table_1"
-    filters = "?fields=record_date,current_month_gross_rcpt_amt,current_month_gross_outly_amt,current_month_dfct_sur_amt&filter=record_date:gte:2020-01-01"
-    response = requests.get(url+filters)
-    return response.json()['data']
+def fetch_treasury_statements():
+    # url = "https://api.fiscaldata.treasury.gov/services/api/fiscal_service/v1/accounting/mts/mts_table_1"
+    # filters = "?filter=record_date:gte:2025-01-01,data_type_cd:eq:D,record_fiscal_quarter:eq:3,record_calendar_month:eq:06,sequence_number_cd:gte:2"
+    # # ?fields=record_date,current_month_gross_rcpt_amt,current_month_gross_outly_amt,current_month_dfct_sur_amt&
+    # response = requests.get(url+filters)
+    # return response.json()['data'], len(response.json()['data'])\
+    treasury_data = pd.read_excel('../data/TreasuryStatements.xls')
+    
+    # Clean the data - remove rows where Period is not a valid date
+    treasury_data = treasury_data.dropna(subset=['Period'])
+    treasury_data['Period'] = pd.to_datetime(treasury_data['Period'], errors='coerce')
+    treasury_data = treasury_data.dropna(subset=['Period'])
+    
+    # Filter for dates >= 2025/01/01
+    treasury_data = treasury_data[treasury_data['Period'] >= pd.to_datetime('2020/01/01')]
+    treasury_data = treasury_data.filter(items=['Period', 'Receipts', 'Outlays', 'Deficit/Surplus (-)'])
+    
+    # Convert numeric columns to integers, handling any non-numeric values
+    numeric_columns = ['Receipts', 'Outlays', 'Deficit/Surplus (-)']
+    for col in numeric_columns:
+        if col in treasury_data.columns:
+            # Remove all characters except digits and minus sign, then convert to int
+            treasury_data[col] = treasury_data[col].astype(str).str.replace(r'[^0-9-]', '', regex=True)
+            treasury_data[col] = pd.to_numeric(treasury_data[col], errors='coerce').fillna(0).astype(int)
+    return treasury_data
+
+def insert_treasury_statements(conn, treasury_statements):
+    try:
+        cur = conn.cursor()
+        cur.execute("CREATE TABLE IF NOT EXISTS treasury_statements(date DATE PRIMARY KEY, receipts INT, outlays INT, deficit_surplus INT)")
+        for index, row in treasury_statements.iterrows():
+            cur.execute("INSERT INTO treasury_statements (date, receipts, outlays, deficit_surplus) VALUES (%s, %s, %s, %s)", (row["Period"], row["Receipts"], row["Outlays"], row["Deficit/Surplus (-)"]))
+        conn.commit()
+    except Error as error:
+        print("Error with inserting treasury statements", error)
+    finally:
+        cur.close()
+
+def get_treasury_statements(conn):
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM treasury_statements")
+        result = cur.fetchall()
+    except Error as error:
+        print("Error with getting treasury statements", error)
+    finally:
+        cur.close()
+        return result
+
 
 def insert_federal_debt(conn, federal_debt):
     try:
@@ -156,15 +200,11 @@ def get_federal_debt(conn):
     finally:
         cur.close()
         return result
-# def main():
-#     with connection_scope() as conn:
-#        insert_federal_debt(conn, get_federal_debt())
-#        cur = conn.cursor()
-#        cur.execute("SELECT * FROM federal_debt")
-#        print(cur.fetchall())
-#        cur.close()
+def main():
+    with connection_scope() as conn:
+       insert_treasury_statements(conn, fetch_treasury_statements())
+       print(get_treasury_statements(conn))
     
 
 if __name__ == "__main__":
-    print(get_treasury_statements())
-        
+    main()

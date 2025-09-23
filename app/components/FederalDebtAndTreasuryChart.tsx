@@ -3,6 +3,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import FederalDebtChart from "./FederalDebtChart";
 import TreasuryStatementsChart from "./TreasuryStatementsChart";
+import { deepEqual } from "assert";
 
 interface DebtDataPoint {
   year: number;
@@ -10,7 +11,7 @@ interface DebtDataPoint {
 }
 
 interface TreasuryStatement {
-  record_date: string;
+  record_date: Date;
   current_month_gross_rcpt_amt: number;
   current_month_gross_outly_amt: number;
   current_month_dfct_sur_amt: number;
@@ -98,14 +99,30 @@ export default function FederalDebtAndTreasuryChart({
                 its creditors, representing the cumulative deficit over time.
               </p>
               <div className="bg-purple-50 p-6 rounded-lg p-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
+                  <div className="bg-white p-4 rounded-lg shadow-sm">
+                    <div className="text-2xl font-bold text-purple-700">
+                      $
+                      {(
+                        (debtSummary.lastDebt - debtSummary.firstDebt) /
+                        1000000000000
+                      ).toFixed(2)}
+                      T
+                    </div>
+                    <div className="text-sm text-gray-600">Total Increase</div>
+                    <div className="text-xs text-gray-500 mt-1">
+                      {debtSummary.firstYear} - {debtSummary.lastYear}
+                    </div>
+                  </div>
                   <div className="bg-white p-4 rounded-lg shadow-sm">
                     <div className="text-2xl font-bold text-purple-700">
                       {debtSummary.totalIncrease.toFixed(1)}%
                     </div>
-                    <div className="text-sm text-gray-600">Total Increase</div>
+                    <div className="text-sm text-gray-600">
+                      Total Percent Increase
+                    </div>
                     <div className="text-xs text-gray-500 mt-1">
-                      Over {debtSummary.yearsSpan} years
+                      {debtSummary.firstYear} - {debtSummary.lastYear}
                     </div>
                   </div>
                   <div className="bg-white p-4 rounded-lg shadow-sm">

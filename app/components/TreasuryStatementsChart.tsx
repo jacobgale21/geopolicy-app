@@ -8,11 +8,12 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
+  ReferenceLine,
 } from "recharts";
 import { motion } from "framer-motion";
 
 interface TreasuryStatement {
-  record_date: string;
+  record_date: Date;
   current_month_gross_rcpt_amt: number;
   current_month_gross_outly_amt: number;
   current_month_dfct_sur_amt: number;
@@ -31,10 +32,6 @@ const formatCurrency = (value: number) => {
   }).format(value);
 };
 
-const formatBillions = (value: number) => {
-  return `$${(value / 1000000000).toFixed(1)}B`;
-};
-
 export default function TreasuryStatementsChart({
   data,
 }: TreasuryStatementsChartProps) {
@@ -48,28 +45,30 @@ export default function TreasuryStatementsChart({
       </div>
     );
   }
-
   // Transform data for better display
   const chartData = data.map((item) => {
     // Parse the date more reliably to avoid timezone issues
-    const [year, month, day] = item.record_date.split("-");
-    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
-
+    const date = new Date(item.record_date);
+    const year = date.getFullYear();
+    let month = date.getMonth() + 1; // getMonth() returns 0-11, so add 1
+    let monthString = month.toString();
+    if (month < 10) {
+      monthString = `0${month.toString()}`;
+    }
     return {
       ...item,
-      date: date.toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      }),
-
-      receipts_billions: Number(item.current_month_gross_rcpt_amt) / 1000000000,
-      outlays_billions: Number(item.current_month_gross_outly_amt) / 1000000000,
-      deficit_surplus_billions:
-        Number(item.current_month_dfct_sur_amt) / 1000000000,
+      date: `${monthString}/${year}`,
+      receipts_billions: (
+        Number(item.current_month_gross_rcpt_amt) / 1000
+      ).toFixed(2),
+      outlays_billions: (
+        Number(item.current_month_gross_outly_amt) / 1000
+      ).toFixed(2),
+      deficit_surplus_billions: (
+        Number(item.current_month_dfct_sur_amt) / 1000
+      ).toFixed(2),
     };
   });
-
   // Debug: Log the transformed dat
 
   return (
@@ -89,6 +88,22 @@ export default function TreasuryStatementsChart({
             }}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
+            <ReferenceLine
+              y={0}
+              stroke="#374151"
+              strokeDasharray="2 2"
+              strokeWidth={2}
+              label={{
+                value: "Surplus",
+                position: "bottom",
+                offset: 20,
+                style: {
+                  fill: "#374151",
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                },
+              }}
+            />
             <XAxis
               dataKey="date"
               stroke="#6b7280"
@@ -104,7 +119,7 @@ export default function TreasuryStatementsChart({
               fontSize={12}
               tickLine={false}
               axisLine={false}
-              tickFormatter={(value) => `$${value.toFixed(0)}B`}
+              tickFormatter={(value) => `$${value}B`}
               domain={["dataMin - 50", "dataMax + 50"]}
               label={{
                 value: "Amount (Billions $)",
@@ -134,6 +149,7 @@ export default function TreasuryStatementsChart({
                             {formatCurrency(
                               Number(entry.payload[entry.dataKey])
                             )}
+                            B
                           </p>
                         );
                       })}
