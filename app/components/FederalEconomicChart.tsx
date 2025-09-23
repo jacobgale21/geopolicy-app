@@ -56,11 +56,48 @@ export default function FederalEconomicChart({
   // Transform data for better display
   const chartData = data.map((item) => ({
     ...item,
-    date: item.date.toString(),
     gdp: item.gdp / 1000, // Convert to trillions
     wages_and_salaries: item.wages_and_salaries,
     inflation: 0,
   }));
+
+  const getGDPSummary = () => {
+    const firstPastYear = chartData[0].gdp;
+    const lastFutureYear = chartData[chartData.length - 1].gdp;
+    const lastPastYear = chartData.find((item) => item.date === 2025)?.gdp;
+    const lastPastInflation = chartData.find(
+      (item) => item.date === 2025
+    )?.inflation;
+
+    const firstPastInflation = chartData[1].inflation;
+    const lastFutureInflation = chartData[chartData.length - 1].inflation;
+
+    if (!lastPastYear || !lastPastInflation) {
+      return {
+        totalIncrease: 0,
+        averageAnnualIncrease: 0,
+        lastYear: 0,
+        lastPastInflation: 0,
+      };
+    }
+    const totalPastPercentageIncrease =
+      ((lastPastYear - firstPastYear) / firstPastYear) * 100;
+    const totalFuturePercentageIncrease =
+      ((lastFutureYear - lastPastYear) / lastPastYear) * 100;
+    const totalPastInflation = lastPastInflation - firstPastInflation;
+    const totalFutureInflation = lastFutureInflation - lastPastInflation;
+    return {
+      totalPastIncrease: totalPastPercentageIncrease,
+      averageAnnualIncrease:
+        totalPastPercentageIncrease / (2025 - chartData[0].date),
+      totalFutureIncrease: totalFuturePercentageIncrease,
+      averageAnnualFutureIncrease:
+        totalFuturePercentageIncrease /
+        (chartData[chartData.length - 1].date - 2025),
+      totalPastInflation: totalPastInflation,
+      totalFutureInflation: totalFutureInflation,
+    };
+  };
 
   for (let i = 1; i < chartData.length; i++) {
     chartData[i].inflation =
@@ -68,7 +105,7 @@ export default function FederalEconomicChart({
         chartData[i - 1].pce_price_index) *
       100;
   }
-
+  const gdpSummary = getGDPSummary();
   return (
     <section className="relative w-full bg-white rounded-lg shadow-lg p-6 mx-6 mb-8">
       {/* Title */}
@@ -382,52 +419,123 @@ export default function FederalEconomicChart({
       </motion.div>
 
       {/* Description */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6, delay: 0.4 }}
-        viewport={{ once: true }}
-        className="mt-8 text-center max-w-4xl mx-auto"
-      >
-        <div className="space-y-6">
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-blue-900 mb-2">
-              GDP (Gross Domestic Product)
-            </h3>
-            <p className="text-blue-700 text-sm">
-              The total value of goods and services produced in the United
-              States, representing the overall economic output.
-            </p>
+      {gdpSummary && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.4 }}
+          viewport={{ once: true }}
+          className="mt-8 text-center max-w-4xl mx-auto"
+        >
+          <div className="space-y-6">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-blue-900 mb-2">
+                GDP (Gross Domestic Product)
+              </h3>
+              <p className="text-blue-700 text-sm mb-4">
+                The total value of goods and services produced in the United
+                States, representing the overall economic output.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
+                <div className="bg-white p-4 rounded-lg shadow-sm">
+                  <div className="text-2xl font-bold text-blue-700">
+                    {gdpSummary.totalPastIncrease?.toFixed(1)}%
+                  </div>
+                  <div className="text-sm text-gray-600">Total Increase</div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Over {2025 - chartData[0].date} years
+                  </div>
+                </div>
+                <div className="bg-white p-4 rounded-lg shadow-sm">
+                  <div className="text-2xl font-bold text-blue-700">
+                    {gdpSummary.averageAnnualIncrease?.toFixed(1)}%
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Average Annual Increase
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Per year ({chartData[0].date} - 2025)
+                  </div>
+                </div>
+                <div className="bg-white p-4 rounded-lg shadow-sm">
+                  <div className="text-2xl font-bold text-blue-700">
+                    {gdpSummary.totalFutureIncrease?.toFixed(1)}%
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Total Projected Increase
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Over next {chartData[chartData.length - 1].date - 2025}{" "}
+                    years
+                  </div>
+                </div>
+                <div className="bg-white p-4 rounded-lg shadow-sm">
+                  <div className="text-2xl font-bold text-blue-700">
+                    {gdpSummary.averageAnnualFutureIncrease?.toFixed(1)}%
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Average Annual Increase
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Per year (2025 - {chartData[chartData.length - 1].date})
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-green-900 mb-2">
+                Wages & Salaries
+              </h3>
+              <p className="text-green-700 text-sm">
+                Total compensation paid to employees, including wages, salaries,
+                and other forms of compensation.
+              </p>
+            </div>
+            <div className="bg-yellow-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-yellow-900 mb-2">
+                PCE Price Index
+              </h3>
+              <p className="text-yellow-700 text-sm">
+                A measure of inflation based on the prices of goods and services
+                consumed by households.
+              </p>
+            </div>
+            <div className="bg-red-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-red-900 mb-2">
+                Yearly Inflation Rate
+              </h3>
+              <p className="text-red-700 text-sm mb-4">
+                The year-over-year percentage change in the PCE Price Index,
+                showing the rate of inflation from one year to the next.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-center">
+                <div className="bg-white p-4 rounded-lg shadow-sm">
+                  <div className="text-2xl font-bold text-red-700">
+                    {gdpSummary.totalPastInflation?.toFixed(1)}%
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Average Annual Past Inflation
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Per year ({chartData[0].date} - 2025)
+                  </div>
+                </div>
+                <div className="bg-white p-4 rounded-lg shadow-sm">
+                  <div className="text-2xl font-bold text-red-700">
+                    {gdpSummary.totalFutureInflation?.toFixed(1)}%
+                  </div>
+                  <div className="text-sm text-gray-600">
+                    Average Annual Future Inflation
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">
+                    Per year (2025 - {chartData[chartData.length - 1].date})
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="bg-green-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-green-900 mb-2">
-              Wages & Salaries
-            </h3>
-            <p className="text-green-700 text-sm">
-              Total compensation paid to employees, including wages, salaries,
-              and other forms of compensation.
-            </p>
-          </div>
-          <div className="bg-yellow-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-yellow-900 mb-2">
-              PCE Price Index
-            </h3>
-            <p className="text-yellow-700 text-sm">
-              A measure of inflation based on the prices of goods and services
-              consumed by households.
-            </p>
-          </div>
-          <div className="bg-red-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-red-900 mb-2">
-              Yearly Inflation Rate
-            </h3>
-            <p className="text-red-700 text-sm">
-              The year-over-year percentage change in the PCE Price Index,
-              showing the rate of inflation from one year to the next.
-            </p>
-          </div>
-        </div>
-      </motion.div>
+        </motion.div>
+      )}
     </section>
   );
 }
