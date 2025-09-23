@@ -111,7 +111,6 @@ export default function SpendingPage() {
             // Fetch federal debt and treasury statements data
             try {
               const debtDataResponse = await apiService.getFederalDebt(token);
-              console.log("Debt data:", debtDataResponse);
 
               if (debtDataResponse.federal_debt) {
                 const debtData = debtDataResponse.federal_debt.map(
@@ -124,7 +123,6 @@ export default function SpendingPage() {
               }
 
               if (debtDataResponse.treasury_statements) {
-                console.log(debtDataResponse.treasury_statements);
                 const treasuryData = debtDataResponse.treasury_statements.map(
                   (item: [Date, number, number, number]) => ({
                     record_date: item[0],
@@ -133,7 +131,6 @@ export default function SpendingPage() {
                     current_month_dfct_sur_amt: item[3],
                   })
                 );
-                console.log(treasuryData);
                 setTreasuryStatements(treasuryData);
               }
             } catch (error) {

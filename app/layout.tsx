@@ -4,7 +4,7 @@ import RequireAuth from "./components/RequireAuth";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import AddressProvider from "./context/AddressContext";
-
+import SignOutButton from "./components/SignOutButton";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -112,6 +112,10 @@ export default function RootLayout({
                     State Stats
                   </span>
                 </Link>
+              </div>
+              {/* Sign Out Button - positioned on the right */}
+              <div className="flex items-center">
+                <SignOutButton />
               </div>
             </div>
           </div>
