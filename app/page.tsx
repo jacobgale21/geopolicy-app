@@ -6,8 +6,8 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // Redirect to start page for authentication and setup
-    router.push("/start_page");
+    // Redirect to dashboard (which will handle authentication and setup)
+    router.push("/dashboard");
   }, [router]);
 
   return (

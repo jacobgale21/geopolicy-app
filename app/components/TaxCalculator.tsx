@@ -160,132 +160,139 @@ export default function TaxCalculator({ onTaxCalculated }: TaxCalculatorProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
-      <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-        Federal Income Tax Calculator
-      </h2>
+    <div className="space-y-8">
+      <div className="bg-white rounded-lg shadow-lg p-6 max-w-2xl mx-auto">
+        <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+          Federal Income Tax Calculator
+        </h2>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Input Section */}
-        <div className="space-y-4">
-          <div>
-            <label
-              htmlFor="income"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Annual Income
-            </label>
-            <input
-              type="number"
-              id="income"
-              value={income}
-              onChange={(e) => setIncome(e.target.value)}
-              placeholder="Enter your annual income"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm font-medium text-gray-800"
-            />
-          </div>
-
-          <div>
-            <label
-              htmlFor="filingStatus"
-              className="block text-sm font-medium text-gray-700 mb-2"
-            >
-              Filing Status
-            </label>
-            <select
-              id="filingStatus"
-              value={filingStatus}
-              onChange={(e) => setFilingStatus(e.target.value as FilingStatus)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm font-medium text-gray-800"
-            >
-              <option value="single">Single</option>
-              <option value="married">Married Filing Jointly</option>
-              <option value="marriedSeparately">
-                Married Filing Separately
-              </option>
-              <option value="headOfHousehold">Head of Household</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Results Section */}
-        <div className="space-y-4">
-          {calculation ? (
-            <>
-              {/* Circular Chart */}
-              <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={chartData}
-                      cx="50%"
-                      cy="50%"
-                      innerRadius={60}
-                      outerRadius={100}
-                      paddingAngle={5}
-                      dataKey="value"
-                    >
-                      {chartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip
-                      formatter={(value: number) => [formatCurrency(value), ""]}
-                      contentStyle={{
-                        backgroundColor: "white",
-                        border: "1px solid #e5e7eb",
-                        borderRadius: "8px",
-                        boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
-                      }}
-                    />
-                    <Legend />
-                  </PieChart>
-                </ResponsiveContainer>
-              </div>
-
-              {/* Tax Summary */}
-              <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium text-gray-600">
-                    Total Tax Owed:
-                  </span>
-                  <span className="text-lg font-bold text-red-600">
-                    {formatCurrency(calculation.totalTax)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium text-gray-600">
-                    After-Tax Income:
-                  </span>
-                  <span className="text-lg font-bold text-green-600">
-                    {formatCurrency(calculation.afterTaxIncome)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium text-gray-600">
-                    Effective Tax Rate:
-                  </span>
-                  <span className="text-sm font-semibold text-gray-800">
-                    {formatPercentage(calculation.effectiveRate)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm font-medium text-gray-600">
-                    Marginal Tax Rate:
-                  </span>
-                  <span className="text-sm font-semibold text-gray-800">
-                    {formatPercentage(calculation.marginalRate)}
-                  </span>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="h-64 flex items-center justify-center text-gray-500">
-              <p className="text-center">
-                Enter your income to see tax calculation
-              </p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Input Section */}
+          <div className="space-y-4">
+            <div>
+              <label
+                htmlFor="income"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Annual Income
+              </label>
+              <input
+                type="number"
+                id="income"
+                value={income}
+                onChange={(e) => setIncome(e.target.value)}
+                placeholder="Enter your annual income"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm font-medium text-gray-800"
+              />
             </div>
-          )}
+
+            <div>
+              <label
+                htmlFor="filingStatus"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Filing Status
+              </label>
+              <select
+                id="filingStatus"
+                value={filingStatus}
+                onChange={(e) =>
+                  setFilingStatus(e.target.value as FilingStatus)
+                }
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 text-sm font-medium text-gray-800"
+              >
+                <option value="single">Single</option>
+                <option value="married">Married Filing Jointly</option>
+                <option value="marriedSeparately">
+                  Married Filing Separately
+                </option>
+                <option value="headOfHousehold">Head of Household</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Results Section */}
+          <div className="space-y-4">
+            {calculation ? (
+              <>
+                {/* Circular Chart */}
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Pie
+                        data={chartData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={60}
+                        outerRadius={100}
+                        paddingAngle={5}
+                        dataKey="value"
+                      >
+                        {chartData.map((entry, index) => (
+                          <Cell key={`cell-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={(value: number) => [
+                          formatCurrency(value),
+                          "",
+                        ]}
+                        contentStyle={{
+                          backgroundColor: "white",
+                          border: "1px solid #e5e7eb",
+                          borderRadius: "8px",
+                          boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1)",
+                        }}
+                      />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Tax Summary */}
+                <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                  <div className="flex justify-between">
+                    <span className="text-sm font-medium text-gray-600">
+                      Total Tax Owed:
+                    </span>
+                    <span className="text-lg font-bold text-red-600">
+                      {formatCurrency(calculation.totalTax)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm font-medium text-gray-600">
+                      After-Tax Income:
+                    </span>
+                    <span className="text-lg font-bold text-green-600">
+                      {formatCurrency(calculation.afterTaxIncome)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm font-medium text-gray-600">
+                      Effective Tax Rate:
+                    </span>
+                    <span className="text-sm font-semibold text-gray-800">
+                      {formatPercentage(calculation.effectiveRate)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-sm font-medium text-gray-600">
+                      Marginal Tax Rate:
+                    </span>
+                    <span className="text-sm font-semibold text-gray-800">
+                      {formatPercentage(calculation.marginalRate)}
+                    </span>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div className="h-64 flex items-center justify-center text-gray-500">
+                <p className="text-center">
+                  Enter your income to see tax calculation
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

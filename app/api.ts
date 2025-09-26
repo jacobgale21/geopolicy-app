@@ -173,6 +173,38 @@ class ApiService {
     const data: any = await response.json();
     return data;
   }
+  async saveUserInterests(token: string, interests: string[]): Promise<any> {
+    const url = `${this.baseUrl}/save_user_interests`;
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ interests }),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to save user interests");
+    }
+    const data: any = await response.json();
+    return data;
+  }
+  async getUserInterests(token: string): Promise<any> {
+    const url = `${this.baseUrl}/get_user_interests`;
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || "Failed to fetch user interests");
+    }
+    const data: any = await response.json();
+    return data;
+  }
 }
 
 export const apiService = new ApiService(API_BASE_URL);

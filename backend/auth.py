@@ -25,10 +25,11 @@ def verify_token(credentials: HTTPAuthorizationCredentials = Depends(HTTPBearer(
         if not public_key:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
         payload = jwt.decode(token, public_key, algorithms=["RS256"])
+        # Return the user ID from the token payload
     except Exception as e:
         print("Error verifying token: ", e)
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    return token
+    return payload.get("sub") or payload.get("username")
 
 def verify_token_query(token = Query(None)):
     try:

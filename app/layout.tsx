@@ -34,14 +34,20 @@ export default function RootLayout({
           <div className="max-w-7xl mx-auto px-4">
             <div className="h-12 flex items-center justify-between relative">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-semibold text-purple-700">
-                  GeoPolicy
-                </span>
+                <Link
+                  href="/dashboard"
+                  className="group relative flex items-center gap-2 px-3 py-2 rounded-md border-transparent hover:border-gray-500 hover:bg-gray-200"
+                  title="Dashboard"
+                >
+                  <span className="text-sm font-semibold text-purple-700">
+                    GeoPolicy
+                  </span>
+                </Link>
               </div>
               {/* Top Navigation Board - centered */}
               <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-3">
                 <Link
-                  href="/"
+                  href="/representatives"
                   className="group relative flex items-center gap-2 px-3 py-2 rounded-md border-transparent hover:border-gray-500 hover:bg-gray-200"
                   title="Representatives"
                 >
@@ -110,6 +116,18 @@ export default function RootLayout({
                   </span>
                   <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-1 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow whitespace-nowrap">
                     State Stats
+                  </span>
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="group relative flex items-center gap-2 px-3 py-2 rounded-md border-transparent hover:border-gray-500 hover:bg-gray-200"
+                  title="Dashboard"
+                >
+                  <span className="text-xl" aria-hidden>
+                    📊
+                  </span>
+                  <span className="pointer-events-none absolute left-1/2 -translate-x-1/2 top-full mt-1 hidden group-hover:block bg-gray-800 text-white text-xs rounded px-2 py-1 shadow">
+                    Dashboard
                   </span>
                 </Link>
               </div>
