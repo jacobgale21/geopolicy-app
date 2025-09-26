@@ -200,10 +200,18 @@ def get_federal_debt(conn):
     finally:
         cur.close()
         return result
+
+def get_federal_fpl(household_size):
+    try:
+        url = f"https://aspe.hhs.gov/topics/poverty-economic-mobility/poverty-guidelines/api/2024/us/{household_size}"
+        response = requests.get(url)
+        return response.json()['data']['income']
+    except Exception as e:
+        print("Error with getting federal fpl", e)
+        return None
+
 def main():
-    with connection_scope() as conn:
-       insert_treasury_statements(conn, fetch_treasury_statements())
-       print(get_treasury_statements(conn))
+    print(get_federal_fpl(2))
     
 
 if __name__ == "__main__":

@@ -3,6 +3,7 @@ import TaxCalculator from "../components/TaxCalculator";
 import GovernmentSpendingChart from "../components/GovernmentSpendingChart";
 import FederalEconomicChart from "../components/FederalEconomicChart";
 import FederalDebtAndTreasuryChart from "../components/FederalDebtAndTreasuryChart";
+import Benefits from "../components/Benefits";
 import { useState } from "react";
 import { getCurrentUser } from "aws-amplify/auth";
 import { seedUsAveragesCache } from "../utils/usCensusCache";
@@ -151,6 +152,11 @@ export default function SpendingPage() {
       <div className="flex items-center justify-center p-4 pt-14">
         <div className="w-full max-w-2xl">
           <TaxCalculator onTaxCalculated={setUserTaxAmount} />
+        </div>
+      </div>
+      <div className="flex items-center justify-center p-4 pt-14">
+        <div className="w-full max-w-2xl">
+          <Benefits income={userTaxAmount} />
         </div>
       </div>
 

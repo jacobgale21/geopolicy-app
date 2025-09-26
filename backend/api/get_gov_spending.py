@@ -1,6 +1,6 @@
 import requests
 from fastapi import APIRouter, Depends
-from services.get_federal_spending import get_agency_data, get_budget_functions, get_federal_economic_data, get_federal_debt, get_treasury_statements
+from services.get_federal_spending import get_agency_data, get_budget_functions, get_federal_economic_data, get_federal_debt, get_treasury_statements, get_federal_fpl
 from db import connection_scope
 from auth import verify_token
 from helper import translate_state
@@ -26,5 +26,14 @@ async def get_federal_debt_endpoint(token: str = Depends(verify_token)):
         federal_debt = get_federal_debt(conn)
         treasury_statements = get_treasury_statements(conn)
         return {"federal_debt": federal_debt, "treasury_statements": treasury_statements}
+
+@app.get("/get_federal_fpl/{household_size}")
+async def get_federal_fpl_endpoint(household_size: int, token: str = Depends(verify_token)):
+    try:
+        fpl = get_federal_fpl(household_size)
+        return {"fpl": fpl}
+    except Exception as e:
+        print("Error with getting federal fpl", e)
+        return {"error": str(e)}
 
 __all__ = ["app"]
