@@ -3,6 +3,10 @@ from psycopg2 import Error
 import pandas as pd
 import os
 import dotenv
+import sys
+dotenv.load_dotenv()
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from db import connection_scope
 
 def get_senators(conn):
     try:
@@ -24,7 +28,7 @@ def get_senators(conn):
 
         # Read CSV file with error handling
         try:
-            df = pd.read_csv("legislator_data/legislators-current.csv")
+            df = pd.read_csv("../legislator_data/legislators-current.csv")
             print(f"Successfully loaded CSV with {len(df)} records")
         except FileNotFoundError:
             print("Error: CSV file not found. Please check the file path.")
@@ -160,41 +164,84 @@ def get_representatives(conn):
         if 'cur' in locals():
             cur.close()
 
-def main():
-    # Load environment variables
-    dotenv.load_dotenv()
-
-    # Database configuration from environment variables
-    db_config = {
-        "host":  "localhost",
-        "database": os.getenv("DB_NAME"),
-        "user": os.getenv("DB_USER"),
-        "password": os.getenv("DB_PASSWORD"),
-        "port": os.getenv("DB_PORT")
-    }
-
+def get_all_senators(conn):
     try:
-        conn = psycopg2.connect(**db_config)
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM Senators")
+        result = cur.fetchall()
     except Exception as e:
-        print("Error connecting db", e)
-    
-    try:
-        # Connect to PostgreSQL
-        conn = psycopg2.connect(**db_config)
-        # get_senators(conn)
-        get_representatives(conn)
-
-
-    except (Exception, Error) as error:
-        print(f"Error while connecting to PostgreSQL: {error}")
-        if 'conn' in locals():
-            conn.rollback()
-        
+        print(f"Error while connecting to PostgreSQL for getting all senators: {e}")
     finally:
-        # Close communication
-        if 'conn' in locals():
-            conn.close()
-            print("Database connection closed.")
+        cur.close()
+        return result
 
-if __name__ == "__main__":
-    main()
+def get_all_representatives(conn):
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM Representatives")
+        result = cur.fetchall()
+    except Exception as e:
+        print(f"Error while connecting to PostgreSQL for getting all representatives: {e}")
+    finally:
+        cur.close()
+        return result
+
+def get_senator_state(conn, state):
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM Senators WHERE state = %s", (state,))
+        result = cur.fetchall()
+    except Exception as e:
+        print(f"Error while connecting to PostgreSQL for getting senator state: {e}")
+    finally:
+        cur.close()
+        return result
+
+def get_representative_state(conn, state, district):
+    try:
+        cur = conn.cursor()
+        cur.execute("SELECT * FROM Representatives WHERE state = %s and district = %s", (state, district))
+        result = cur.fetchall()
+    except Exception as e:
+        print(f"Error while connecting to PostgreSQL for getting representative state: {e}")
+    finally:
+        cur.close()
+        return result
+
+# def main():
+#     with connection_scope() as conn:
+#         try:
+#             cur = conn.cursor()
+#             leg_df = pd.read_csv("../legislator_data/HS119_members.csv")
+#             senate_df = leg_df[leg_df["chamber"] == "Senate"].copy()
+#             print(f"Processing {len(senate_df)} Senate records...")
+            
+#             # First, let's see what's in the Senators table
+#             cur.execute("SELECT name, state FROM Senators LIMIT 5")
+#             existing_senators = cur.fetchall()
+#             print(f"Sample senators in database: {existing_senators}")
+            
+#             for index, row in senate_df.iterrows():
+#                 names = row["bioname"].split(",")
+#                 names[0] = names[0].title()
+#                 print(f"Processing: {names[0]} from {row['state_abbrev']} with score {row['nominate_dim1']}")
+                
+#                 # Check if any senators match this name and state
+#                 cur.execute("SELECT name, state FROM Senators WHERE name LIKE %s AND state = %s", (f"%{names[0]}%", row["state_abbrev"]))
+#                 matches = cur.fetchall()
+#                 print(f"Found {len(matches)} matches: {matches}")
+                
+#                 if matches:
+#                     cur.execute("UPDATE Senators SET nominate_score = %s WHERE name LIKE %s AND state = %s", (row["nominate_dim1"], f"%{names[0]}%", row["state_abbrev"]))
+#                     print(f"Updated {cur.rowcount} records")
+#                 else:
+#                     print(f"No matches found for {names[0]} in {row['state_abbrev']}")
+#             conn.commit()
+#             print("Nominate score added to Senators")
+#         except Exception as e:
+#             print(f"Error while connecting to PostgreSQL for adding nominate score: {e}")
+#         finally:
+#             cur.close()
+
+# if __name__ == "__main__":
+#     main()

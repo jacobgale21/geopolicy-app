@@ -9,6 +9,7 @@ export interface Legislator {
   address: string;
   phone: string;
   Role: string;
+  Nominate_Score: number;
 }
 export interface LegislatorResponse {
   legislators: Legislator[];

@@ -28,6 +28,7 @@ export default function RepresentativesPage() {
       setLoading(true);
       if (token) {
         const gotlegislators = await apiService.getLegislators(address, token);
+        console.log(gotlegislators);
         setSelectedState(gotlegislators[0].state);
         setState(gotlegislators[0].state);
         setLegislators(gotlegislators);
@@ -122,6 +123,9 @@ export default function RepresentativesPage() {
                         <p>Party: {legislator.party}</p>
                         {legislator.gender && (
                           <p>Gender: {legislator.gender}</p>
+                        )}
+                        {legislator.Nominate_Score && (
+                          <p>Nominate Score: {legislator.Nominate_Score}</p>
                         )}
                       </div>
                     </div>

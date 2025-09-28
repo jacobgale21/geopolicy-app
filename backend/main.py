@@ -1,7 +1,7 @@
 import uvicorn
 from fastapi import FastAPI
-from api import get_crime_data, get_census_data, get_gov_spending, get_health_data, get_legislation_data, get_user_interests
-from get_legislators import app as legislators_router
+from api import get_crime_data, get_census_data, get_gov_spending, get_health_data, get_legislation_data, get_user_interests, get_legislators
+
 from fastapi.middleware.cors import CORSMiddleware
 
 
@@ -15,7 +15,7 @@ app.add_middleware(
 )
 # Register your routers with prefixes and tags
 app.include_router(get_crime_data.app)
-app.include_router(legislators_router)
+app.include_router(get_legislators.app)
 app.include_router(get_census_data.app)
 app.include_router(get_gov_spending.app)
 app.include_router(get_health_data.app)

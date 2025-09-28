@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from geocodio import Geocodio
 from db import connection_scope
 from auth import verify_token
+from services.get_legislator_data import get_senator_state, get_representative_state
 
 # Load environment variables
 dotenv.load_dotenv()
@@ -19,10 +20,9 @@ async def get_legislators(address: str, token: str = Depends(verify_token)):
 
     try:
         with connection_scope() as conn:
-            cur = conn.cursor()
-            cur.execute("SELECT * FROM Senators WHERE state = %s", (state,))
-            senators = cur.fetchall()
-
+            senators = get_senator_state(conn, state)
+            representatives = get_representative_state(conn, state, cd)
+            # Format senators for the state
             formatted_legislators = []
             for senator in senators:
                 formatted_senator = {
@@ -34,13 +34,11 @@ async def get_legislators(address: str, token: str = Depends(verify_token)):
                     "url": senator[5],
                     "address": senator[6],
                     "phone": senator[7],
-                    "Role": "Senator"
+                    "Role": "Senator",
+                    "Nominate_Score": senator[9]
                 }
                 formatted_legislators.append(formatted_senator)
-
-            cur.execute("SELECT * FROM Representatives WHERE state = %s AND district = %s", (state, cd))
-            representatives = cur.fetchall()
-
+            # Format representatives for the state
             for representative in representatives:
                 formatted_representative = {
                     "id": representative[0],
@@ -51,7 +49,8 @@ async def get_legislators(address: str, token: str = Depends(verify_token)):
                     "url": representative[6],
                     "address": representative[7],
                     "phone": representative[8],
-                    "Role": "Representative"
+                    "Role": "Representative",
+                    "Nominate_Score": representative[10]
                 }
                 formatted_legislators.append(formatted_representative)
 
