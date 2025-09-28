@@ -64,9 +64,26 @@ def get_federal_budget_functions():
 def insert_federal_budget_functions(conn, budget_functions_df):
     try:
         cur = conn.cursor()
-        cur.execute("CREATE TABLE IF NOT EXISTS federal_budget_functions(name VARCHAR(255) PRIMARY KEY, amount FLOAT, percent_budget FLOAT)")
+        cur.execute("CREATE TABLE IF NOT EXISTS federal_budget_functions(name VARCHAR(255) PRIMARY KEY, amount FLOAT, percent_budget FLOAT, description TEXT)")
+        
+        # Define descriptions for the first 10 budget functions
+        descriptions = {
+            "Medicare": "Federal health insurance program for people 65 and older, certain younger people with disabilities, and people with End-Stage Renal Disease.",
+            "Social Security": "Federal program providing retirement, disability, and survivor benefits to eligible workers and their families.",
+            "National Defense": "Military spending including personnel, operations, equipment, and defense research and development.",
+            "Net Interest": "Interest payments on the national debt owed to domestic and foreign creditors.",
+            "Health": "Federal health programs including Medicaid, health research, and public health initiatives.",
+            "Income Security": "Programs providing financial assistance to low-income individuals and families, including unemployment benefits and food assistance.",
+            "General Government": "Administrative costs of running the federal government, including executive, legislative, and judicial branches.",
+            "Veterans Benefits and Services": "Healthcare, disability compensation, education benefits, and other services for military veterans.",
+            "Transportation": "Infrastructure spending on highways, airports, public transit, and other transportation systems.",
+            "Education, Training, Employment, and Social Services": "Federal funding for education programs, job training, and social services."
+        }
+        
         for idx, row in budget_functions_df.iterrows():
-            cur.execute("INSERT INTO federal_budget_functions (name, amount, percent_budget) VALUES (%s, %s, %s)", (row["name"], row["amount"], row["percent_budget"]))
+            description = descriptions.get(row["name"], "")  # Empty string for functions not in the first 10
+            cur.execute("INSERT INTO federal_budget_functions (name, amount, percent_budget, description) VALUES (%s, %s, %s, %s)", 
+                       (row["name"], row["amount"], row["percent_budget"], description))
         conn.commit()
     except Error as error:
         print("Error with inserting federal budget functions", error)
@@ -210,9 +227,9 @@ def get_federal_fpl(household_size):
         print("Error with getting federal fpl", e)
         return None
 
-def main():
-    print(get_federal_fpl(2))
+# def main():
+    
     
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()

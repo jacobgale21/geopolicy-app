@@ -17,9 +17,16 @@ interface SpendingData {
   percent_budget: number;
 }
 
+interface BudgetFunctionsData {
+  name: string;
+  amount: number;
+  percent_budget: number;
+  description: string;
+}
+
 interface GovernmentSpendingData {
   agency_data: SpendingData[];
-  budget_functions_data: SpendingData[];
+  budget_functions_data: BudgetFunctionsData[];
 }
 
 interface EconomicDataPoint {
@@ -45,7 +52,7 @@ export default function SpendingPage() {
   const [governmentSpendingData, setGovernmentSpendingData] =
     useState<GovernmentSpendingData | null>(null);
   const [budgetFunctionsData, setBudgetFunctionsData] = useState<
-    SpendingData[]
+    BudgetFunctionsData[]
   >([]);
   const [agencyData, setAgencyData] = useState<SpendingData[]>([]);
   const [userTaxAmount, setUserTaxAmount] = useState<number>(0);
@@ -67,10 +74,11 @@ export default function SpendingPage() {
             const spendingData = await apiService.getAgencySpending(token);
             // console.log(spendingData);
             const budgetFunctions = spendingData.budget_functions_data.map(
-              (item: [string, number, number]) => ({
+              (item: [string, number, number, string]) => ({
                 name: item[0],
                 amount: item[1],
                 percent_budget: item[2],
+                description: item[3],
               })
             );
             setBudgetFunctionsData([

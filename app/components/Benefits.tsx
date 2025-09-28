@@ -133,22 +133,27 @@ export default function Benefits({ income }: BenefitsProps) {
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Available Benefits:
               </h3>
-              <ul className="space-y-1">
+              <div className="flex flex-wrap gap-3">
                 {benefits.map((benefit, index) => (
-                  <li
+                  <span
                     key={index}
-                    className="bg-green-100 text-green-800 px-3 py-1 rounded-md"
+                    className="bg-green-100 text-black px-4 py-2 rounded-full text-base font-medium"
                   >
                     {benefit}
-                  </li>
+                  </span>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
 
           {benefits.length === 0 && !isCalculating && (
-            <div className="mt-4 text-gray-500 text-center">
-              No benefits available based on current criteria
+            <div>
+              <div className="mt-4 text-gray-500 text-center">
+                No benefits available based on current criteria
+              </div>
+              <div className="text-gray-500 text-center">
+                But here is where your tax dollars go to help others
+              </div>
             </div>
           )}
         </div>

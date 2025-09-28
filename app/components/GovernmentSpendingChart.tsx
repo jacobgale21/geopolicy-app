@@ -9,9 +9,16 @@ interface SpendingData {
   percent_budget: number;
 }
 
+interface BudgetFunctionsData {
+  name: string;
+  amount: number;
+  percent_budget: number;
+  description: string;
+}
+
 interface GovernmentSpendingData {
   agency_data: SpendingData[];
-  budget_functions_data: SpendingData[];
+  budget_functions_data: BudgetFunctionsData[];
 }
 
 interface GovernmentSpendingChartProps {
@@ -54,6 +61,9 @@ export default function GovernmentSpendingChart({
     null
   );
   const [activeAgencyIndex, setActiveAgencyIndex] = useState<number | null>(
+    null
+  );
+  const [clickedBudgetIndex, setClickedBudgetIndex] = useState<number | null>(
     null
   );
 
@@ -121,12 +131,15 @@ export default function GovernmentSpendingChart({
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
-          className="text-2xl md:text-3xl font-bold text-gray-800 mb-8 text-center"
+          className="text-2xl md:text-3xl font-bold text-gray-800 mb-2 text-center"
         >
           Budget Functions
         </motion.h3>
+        <p className="text-gray-600 text-center">
+          Click on a budget function to see description of the function
+        </p>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center mt-8">
           {/* Budget Functions Chart */}
           <div className="h-[400px] flex items-center justify-center">
             <ResponsiveContainer width="100%" height="100%">
@@ -141,6 +154,11 @@ export default function GovernmentSpendingChart({
                   paddingAngle={3}
                   onMouseEnter={(_, index) => setActiveBudgetIndex(index)}
                   onMouseLeave={() => setActiveBudgetIndex(null)}
+                  onClick={(_, index) =>
+                    setClickedBudgetIndex(
+                      clickedBudgetIndex === index ? null : index
+                    )
+                  }
                 >
                   {budgetFunctionsData.map((entry, index) => (
                     <Cell
@@ -168,38 +186,63 @@ export default function GovernmentSpendingChart({
 
           {/* Budget Functions Narration */}
           <div className="space-y-6">
-            {budgetFunctionsData.map((item, index) => (
-              <motion.div
-                key={item.name}
-                initial={{ opacity: 0, x: 40 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-white p-4 rounded-2xl shadow-md transition-all hover:shadow-lg"
-              >
-                <h3 className="font-semibold text-lg text-gray-800">
-                  {item.name}
-                </h3>
-                <p className="text-gray-600">
-                  About{" "}
-                  <span className="font-bold text-gray-900">
-                    {item.percent_budget.toFixed(1)}%
-                  </span>{" "}
-                  of your taxes →{" "}
-                  <span className="font-bold text-blue-600">
-                    {userTax > 0
-                      ? ((item.percent_budget / 100) * userTax).toLocaleString(
-                          "en-US",
-                          {
+            {budgetFunctionsData.map((item, index) => {
+              const originalItem = data.budget_functions_data[index];
+              const isClicked = clickedBudgetIndex === index;
+
+              return (
+                <motion.div
+                  key={item.name}
+                  initial={{ opacity: 0, x: 40 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  viewport={{ once: true }}
+                  className={`bg-white p-4 rounded-2xl shadow-md transition-all hover:shadow-lg cursor-pointer ${
+                    isClicked ? "ring-2 ring-blue-500 shadow-lg" : ""
+                  }`}
+                  onClick={() =>
+                    setClickedBudgetIndex(
+                      clickedBudgetIndex === index ? null : index
+                    )
+                  }
+                >
+                  <h3 className="font-semibold text-lg text-gray-800">
+                    {item.name}
+                  </h3>
+                  <p className="text-gray-600">
+                    About{" "}
+                    <span className="font-bold text-gray-900">
+                      {item.percent_budget.toFixed(1)}%
+                    </span>{" "}
+                    of your taxes →{" "}
+                    <span className="font-bold text-blue-600">
+                      {userTax > 0
+                        ? (
+                            (item.percent_budget / 100) *
+                            userTax
+                          ).toLocaleString("en-US", {
                             style: "currency",
                             currency: "USD",
-                          }
-                        )
-                      : formatCurrency(item.amount)}
-                  </span>
-                </p>
-              </motion.div>
-            ))}
+                          })
+                        : formatCurrency(item.amount)}
+                    </span>
+                  </p>
+                  {isClicked && originalItem?.description && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: "auto" }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="mt-3 pt-3 border-t border-gray-200"
+                    >
+                      <p className="text-sm text-gray-700 leading-relaxed">
+                        {originalItem.description}
+                      </p>
+                    </motion.div>
+                  )}
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </div>
