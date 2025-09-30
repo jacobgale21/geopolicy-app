@@ -22,19 +22,12 @@ interface CrimeChartProps {
   data: CrimeDataPoint[];
   state: string;
   crimeType: string;
-  // Optional multi-series props for tabs
-  homicideData?: CrimeDataPoint[];
-  assaultData?: CrimeDataPoint[];
-  burglaryData?: CrimeDataPoint[];
 }
 
 export default function CrimeChart({
   data,
   state,
   crimeType,
-  homicideData,
-  assaultData,
-  burglaryData,
 }: CrimeChartProps) {
   if (!data || data.length === 0) {
     return (
@@ -47,36 +40,19 @@ export default function CrimeChart({
     );
   }
   // Determine available datasets (tabs)
-  const availableDatasets = useMemo(() => {
-    const entries: { type: string; data: CrimeDataPoint[] }[] = [];
-    if (homicideData && homicideData.length > 0)
-      entries.push({ type: "Homicide", data: homicideData });
-    if (assaultData && assaultData.length > 0)
-      entries.push({ type: "Assault", data: assaultData });
-    if (burglaryData && burglaryData.length > 0)
-      entries.push({ type: "Burglary", data: burglaryData });
-    // Fallback to single provided data
-    if (entries.length === 0 && data && data.length > 0)
-      entries.push({ type: crimeType, data });
-    return entries;
-  }, [homicideData, assaultData, burglaryData, data, crimeType]);
-
-  const [selectedType, setSelectedType] = useState<string>(
-    availableDatasets[0]?.type || crimeType
-  );
-
-  const current = useMemo(() => {
-    const found = availableDatasets.find((d) => d.type === selectedType);
-    return found?.data ?? data;
-  }, [availableDatasets, selectedType, data]);
-
-  const rate = selectedType.toLowerCase() !== "homicide";
+  const rate = crimeType.toLowerCase() !== "homicide";
 
   // Transform data for Recharts and merge national assault rates from cache when available
-  const chartData = current.map((item) => {
+  const chartData = data.map((item) => {
     const yearKey = String(item.year);
-    const nationalAssault = (usData as Record<string, any>)[yearKey]?.assault;
-    const nationalBurglary = (usData as Record<string, any>)[yearKey]?.burglary;
+    let nationalAssault = null;
+    let nationalBurglary = null;
+    if (crimeType.toLowerCase() === "assault") {
+      nationalAssault = (usData as Record<string, any>)[yearKey]?.assault;
+    }
+    if (crimeType.toLowerCase() === "burglary") {
+      nationalBurglary = (usData as Record<string, any>)[yearKey]?.burglary;
+    }
     return {
       year: item.year,
       count: item.crime_counts,
@@ -89,33 +65,11 @@ export default function CrimeChart({
   return (
     <div>
       {/* Tabs above the box */}
-      {availableDatasets.length > 1 && (
-        <div className="flex justify-end">
-          <div className="inline-flex border border-b-0 border-gray-200 bg-white overflow-hidden">
-            {availableDatasets.map((d, i) => (
-              <React.Fragment key={d.type}>
-                {i > 0 && <div className="w-px self-stretch bg-gray-200" />}
-                <button
-                  onClick={() => setSelectedType(d.type)}
-                  className={
-                    "px-4 py-2 text-sm font-medium border-b-2 " +
-                    (selectedType === d.type
-                      ? "text-purple-700 border-purple-600 bg-white"
-                      : "text-gray-700 border-gray-100 hover:bg-gray-50")
-                  }
-                >
-                  {d.type}
-                </button>
-              </React.Fragment>
-            ))}
-          </div>
-        </div>
-      )}
 
-      <div className="bg-white border border-gray-200 rounded-b-lg shadow-lg p-6 -mt-px">
+      <div className="bg-white rounded-lg shadow-lg p-6 -mt-px mb-4">
         <div className="mb-4">
           <h3 className="text-lg font-semibold text-gray-900 text-center">
-            {selectedType} Trends in {state}
+            {crimeType} Trends
           </h3>
           <p className="text-sm font-bold text-gray-600 mt-1 text-center">
             {data[0].year} - {data[data.length - 1].year}
@@ -170,7 +124,7 @@ export default function CrimeChart({
                 labelFormatter={(value) => `Year: ${value}`}
                 formatter={(value, name) => [
                   value,
-                  `${selectedType} ${rate ? "Rate" : "Count"}`,
+                  `${crimeType} ${rate ? "Rate" : "Count"}`,
                 ]}
                 contentStyle={{
                   backgroundColor: "white",
@@ -194,7 +148,7 @@ export default function CrimeChart({
                 dot={{ fill: "#9333ea", strokeWidth: 2, r: 4 }}
                 activeDot={{ r: 6, stroke: "#9333ea", strokeWidth: 2 }}
               />
-              {selectedType.toLowerCase() === "assault" && (
+              {crimeType.toLowerCase() === "assault" && (
                 <Line
                   type="monotone"
                   dataKey="us_assault"
@@ -205,7 +159,7 @@ export default function CrimeChart({
                   dot={false}
                 />
               )}
-              {selectedType.toLowerCase() === "burglary" && (
+              {crimeType.toLowerCase() === "burglary" && (
                 <Line
                   type="monotone"
                   dataKey="us_burglary"

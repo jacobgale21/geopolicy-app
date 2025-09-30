@@ -71,6 +71,7 @@ export default function LawEnforcementPage() {
   const [homicideData, setHomicideData] = useState<CrimeDataPoint[]>([]);
   const [assaultData, setAssaultData] = useState<CrimeDataPoint[]>([]);
   const [burglaryData, setBurglaryData] = useState<CrimeDataPoint[]>([]);
+  const [showChart, setShowChart] = useState<boolean>(false);
   const { state, setState } = useAddress();
   useEffect(() => {
     (async () => {
@@ -160,17 +161,51 @@ export default function LawEnforcementPage() {
             </select>
           </div>
         )}{" "}
-        {/* Crime Data Chart */}
+        {/* Dropdown to toggle Crime Data Chart */}
         {homicideData.length > 0 && (
-          <div className="mt-6 pt-4">
-            <CrimeChart
-              data={homicideData}
-              state={state}
-              homicideData={homicideData}
-              assaultData={assaultData}
-              burglaryData={burglaryData}
-              crimeType="Homicide"
-            />
+          <div className="mt-6">
+            <button
+              type="button"
+              onClick={() => setShowChart((v) => !v)}
+              className="w-full flex items-center justify-between bg-white border border-gray-200 bg-white rounded-lg p-6 shadow-lg"
+            >
+              <span className="text-sm font-medium text-gray-900">
+                Violent Crime Data
+              </span>
+              <svg
+                className={`h-5 w-5 text-gray-600 transition-transform ${showChart ? "rotate-180" : "rotate-0"}`}
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+
+            {showChart && (
+              <div className="pt-4">
+                <CrimeChart
+                  data={homicideData}
+                  state={state}
+                  crimeType="Homicide"
+                />
+                <CrimeChart
+                  data={assaultData}
+                  state={state}
+                  crimeType="Assault"
+                />
+                <CrimeChart
+                  data={burglaryData}
+                  state={state}
+                  crimeType="Burglary"
+                />
+              </div>
+            )}
           </div>
         )}
       </div>
