@@ -43,6 +43,38 @@ export default function RepresentativesPage() {
     setFindReps(true);
     await getLegislators(address);
   };
+
+  // Helpers and derived data for representatives chart
+  const extractScore = (l: any): number | null => {
+    const raw = l.Nominate_Score;
+    const num = typeof raw === "string" ? parseFloat(raw) : raw;
+    if (typeof num !== "number" || isNaN(num)) return null;
+    return Math.max(-1, Math.min(1, num));
+  };
+
+  const reps = legislators
+    .map((l: any) => ({ name: l.name, score: extractScore(l) }))
+    .filter((x: any) => x.score !== null);
+
+  const percentFromCenter = (score: number) => Math.abs(score) * 50; // 0..50
+  const leftOffset = (score: number) => 50 + Math.min(0, score) * 50; // 0..50..100
+
+  const colorForScore = (score: number) => {
+    const t = Math.abs(score);
+    if (score < 0) {
+      // dark blue (#1d4ed8) to light blue (#bfdbfe)
+      const r = Math.round(29 + (191 - 29) * t);
+      const g = Math.round(78 + (219 - 78) * t);
+      const b = Math.round(216 + (254 - 216) * t);
+      return `rgb(${r}, ${g}, ${b})`;
+    } else {
+      // light red (#fecaca) to dark red (#b91c1c)
+      const r = Math.round(254 + (185 - 254) * t);
+      const g = Math.round(202 + (28 - 202) * t);
+      const b = Math.round(202 + (28 - 202) * t);
+      return `rgb(${r}, ${g}, ${b})`;
+    }
+  };
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-purple-100 flex items-center justify-center p-4 pt-14">
       <div className="w-full max-w-2xl">
@@ -152,6 +184,89 @@ export default function RepresentativesPage() {
                     )}
                   </div>
                 ))}
+                <div className="mt-8 bg-white rounded-lg p-6 shadow-lg pt-6">
+                  {reps.length > 0 && (
+                    <div>
+                      <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                        Legislators Nominate Score (Liberal to Conservative)
+                      </h4>
+
+                      <div className="mb-4">
+                        <div className="relative w-full">
+                          <div
+                            className="h-3 rounded w-full"
+                            style={{
+                              background:
+                                "linear-gradient(to right, #1d4ed8 0%, #bfdbfe 50%, #fecaca 50%, #b91c1c 100%)",
+                            }}
+                          />
+                          {/* markers layer */}
+                          <div className="pointer-events-none absolute inset-0">
+                            {reps.map((r: any, i: number) => (
+                              <div
+                                key={`marker-${i}`}
+                                title={`${r.name}: ${r.score}`}
+                                className="absolute top-1/2 -translate-y-1/2"
+                                style={{
+                                  left: `${((Number(r.score) + 1) / 2) * 100}%`,
+                                  transform: "translate(-50%, -50%)",
+                                }}
+                              >
+                                <span
+                                  className="block h-2.5 w-2.5 rounded-full ring-2 ring-white"
+                                  style={{
+                                    backgroundColor: colorForScore(
+                                      r.score as number
+                                    ),
+                                  }}
+                                />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                        <div className="flex justify-between text-xs text-gray-600 mt-1">
+                          <span>-1</span>
+                          <span>0</span>
+                          <span>1</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        {reps.map((r: any, idx: number) => (
+                          <div
+                            key={idx}
+                            className="bg-white rounded-lg p-6 shadow-lg"
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <span className="text-sm font-medium text-gray-900">
+                                {r.name}
+                              </span>
+                              <span className="text-sm text-gray-700">
+                                {r.score}
+                              </span>
+                            </div>
+                            <div className="relative h-4 bg-gray-100 rounded">
+                              <div
+                                className="absolute top-0 bottom-0 w-px bg-gray-400"
+                                style={{ left: "50%" }}
+                              />
+                              <div
+                                className="absolute top-0 h-4 rounded"
+                                style={{
+                                  left: `${leftOffset(r.score as number)}%`,
+                                  width: `${percentFromCenter(r.score as number)}%`,
+                                  backgroundColor: colorForScore(
+                                    r.score as number
+                                  ),
+                                }}
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
